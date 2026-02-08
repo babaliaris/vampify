@@ -34,7 +34,7 @@ async function vampifyServerStart()
   {
     await server.register(vampifyApp);
     await server.ready();
-    await server.listen({ port: server.getEnvs().PORT, host: '0.0.0.0' });
+    await server.listen({ port: server.getEnvs().SERVER_PORT, host: '0.0.0.0' });
 
     process.on('SIGINT', () => vampifyServerShutdown('SIGINT'));
     process.on('SIGTERM', () => vampifyServerShutdown('SIGTERM'));
