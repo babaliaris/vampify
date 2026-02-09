@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,      // Generates .d.ts files
+    "declarationMap": true,   // Allows "Go to Definition" to jump to your code
+    "emitDeclarationOnly": false
+  },
+  "include": ["src/core/**/*"], 
+  "exclude": ["src/sandbox/**/*", "src/**/*.test",  "src/**/*.spec"]
+}

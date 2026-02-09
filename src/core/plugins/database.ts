@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/mysql2";
 import { sql } from "drizzle-orm";
 import mysql from "mysql2/promise";
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
@@ -43,7 +43,7 @@ const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabaseP
   // Check if the connection was enstablished on server startup.
   // Else, let the server crash.
   fastify.addHook('onReady', async () => {
-    await fastify.db.execute(sql`SELECT 1`);
+    await db.execute(sql`SELECT 1`);
     fastify.log.info('Database connection verified!');
   });
 

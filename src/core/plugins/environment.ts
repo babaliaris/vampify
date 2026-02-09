@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Type, Static } from '@sinclair/typebox'
 
 //Define the Schema.
-export const EnvSchema = Type.Object(
+export const VampifyEnvSchema = Type.Object(
 {
   SERVER_PORT: Type.Number(),
   DB_URL: Type.String(),
@@ -18,7 +18,7 @@ export const EnvSchema = Type.Object(
 });
 
 // Convert the Schema to a typscript object.
-export type EnvType = Static<typeof EnvSchema>
+export type VampifyEnvType = Static<typeof VampifyEnvSchema>
 
 // Plugin Options.
 export type VampifyEnvOptions = {
@@ -38,7 +38,7 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
 
   //Register @fastify/env
   await fastify.register(fastifyEnv, {
-    schema: EnvSchema,
+    schema: VampifyEnvSchema,
     dotenv: {
       path: envPath,
       debug: true
@@ -49,7 +49,7 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
 
 declare module 'fastify' {
   interface FastifyInstance {
-    getEnvs(): EnvType; 
+    getEnvs(): VampifyEnvType; 
   }
 }
 

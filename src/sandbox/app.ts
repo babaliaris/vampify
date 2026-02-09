@@ -4,9 +4,9 @@ import AutoLoad from '@fastify/autoload';
 import { join } from 'node:path';
 import { MySql2Database } from 'drizzle-orm/mysql2';
 
-import { vampifyPlugin } from './core/vampify.js';
+import { vampifyPlugin } from '../core/vampify.js';
 
-import * as schema from "@/db/schema.js";
+import * as schema from "@/sandbox/db/schema.js";
 
 export const vampifyApp = fp( async (fastify: FastifyInstance, opts: FastifyPluginOptions) =>
 {
@@ -27,8 +27,7 @@ export const vampifyApp = fp( async (fastify: FastifyInstance, opts: FastifyPlug
 
 });
 
-
-// Extend the Fastify type system for the database schema.
+// Extend the Fastify type system.
 declare module 'fastify' {
   interface FastifyInstance {
     db: MySql2Database<typeof schema>;
