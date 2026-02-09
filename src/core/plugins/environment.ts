@@ -1,9 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import fp from "fastify-plugin";
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyEnv from '@fastify/env';
 import { join } from 'node:path';
 import { Type, Static } from '@sinclair/typebox'
 
-//Define the 
+//Define the Schema.
 export const EnvSchema = Type.Object(
 {
   SERVER_PORT: Type.Number(),
@@ -16,13 +17,22 @@ export const EnvSchema = Type.Object(
   DB_DEBUG: Type.Boolean()
 });
 
+// Convert the Schema to a typscript object.
 export type EnvType = Static<typeof EnvSchema>
 
+// Plugin Options.
+export type VampifyEnvOptions = {
+
+} & FastifyPluginOptions;
+
+// Get NODE_ENV and the full path of the .env relative to the root.
 const nodeEnv = process.env.NODE_ENV;
 const envPath = join(process.cwd(), `.env.${nodeEnv}`);
 
-
-export async function registerFastifyEnv(fastify: FastifyInstance)
+/**
+ * Vampify environment variables loader plugin.
+ */
+const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOptions) => 
 {
   fastify.log.info(`Registering: ${envPath}`);
 
@@ -34,10 +44,13 @@ export async function registerFastifyEnv(fastify: FastifyInstance)
       debug: true
     }
   });
-}
+});
+
 
 declare module 'fastify' {
   interface FastifyInstance {
     getEnvs(): EnvType; 
   }
 }
+
+export default vampifyEnvPlugin;

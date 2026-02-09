@@ -2,13 +2,17 @@ import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import AutoLoad from '@fastify/autoload';
 import { join } from 'node:path';
-import { registerFastifyEnv } from '@/core/env.js';
+import { MySql2Database } from 'drizzle-orm/mysql2';
+
+import { vampifyPlugin } from './core/vampify.js';
+
+import * as schema from "@/db/schema.js";
 
 export const vampifyApp = fp( async (fastify: FastifyInstance, opts: FastifyPluginOptions) =>
 {
-  // Load Environment Variables.
-  await registerFastifyEnv(fastify);
-  
+  // Register the vampify plugin.
+  fastify.register(vampifyPlugin, {schema: schema});
+
   // Auto-load Plugins
   void fastify.register(AutoLoad, {
     dir: join(import.meta.dirname, 'plugins'),
@@ -22,3 +26,11 @@ export const vampifyApp = fp( async (fastify: FastifyInstance, opts: FastifyPlug
   });
 
 });
+
+
+// Extend the Fastify type system for the database schema.
+declare module 'fastify' {
+  interface FastifyInstance {
+    db: MySql2Database<typeof schema>;
+  }
+}

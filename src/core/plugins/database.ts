@@ -1,12 +1,22 @@
 import fp from "fastify-plugin";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
 import { sql } from "drizzle-orm";
 import mysql from "mysql2/promise";
-import * as schema from "../db/schema.js";
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 
-export default fp(async (fastify: FastifyInstance, opt: FastifyPluginOptions) =>
+export type DatabasePluginOptions = {
+  schema: Record<string, unknown>
+} & FastifyPluginOptions;
+
+
+/**
+ * Vampify database plugin (drizzle orm).
+ */
+const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabasePluginOptions) =>
 {
+  // True if we run in development mode.
+  const isDevMode = process.env.NODE_ENV === "development";
+
   // Create the MYSQL connection pool.
   const pool = mysql.createPool({
     host: fastify.getEnvs().DB_HOST,
@@ -14,13 +24,13 @@ export default fp(async (fastify: FastifyInstance, opt: FastifyPluginOptions) =>
     password: fastify.getEnvs().DB_PASS,
     database: fastify.getEnvs().DB_NAME,
     connectionLimit: fastify.getEnvs().DB_LIMIT,
-    debug: fastify.getEnvs().DB_DEBUG,
+    debug: fastify.getEnvs().DB_DEBUG && isDevMode,
     dateStrings: true,
     bigNumberStrings: true
   });
 
   // Initialize Drizzle
-  const db = drizzle(pool, { schema, mode: "default" });
+  const db = drizzle(pool, { schema: opt.schema, mode: "default"});
 
   // Decorate fastify with the Drizzle instance.
   fastify.decorate("db", db as any);
@@ -39,9 +49,4 @@ export default fp(async (fastify: FastifyInstance, opt: FastifyPluginOptions) =>
 
 });
 
-// Extend the Fastify type system.
-declare module 'fastify' {
-  interface FastifyInstance {
-    db: ReturnType<typeof drizzle<typeof schema>>;
-  }
-}
+export default vampifyDatabasePlugin;

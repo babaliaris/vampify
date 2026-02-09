@@ -1,27 +1,34 @@
 import { FastifyPluginAsync } from "fastify";
+import { sql } from "drizzle-orm";
 
 const root: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
 {
   fastify.get('/health', async (request, reply) =>
   {
-    const health = {
-      status: 'ok',
-      uptime: process.uptime(),
-      timestamp: Date.now(),
-      // You can add more checks here later:
-      // db: await checkDbConnection()
-    };
+    let dbStatus = 'failed';
 
     try
     {
-      return reply.status(200).send(health);
-
+      await fastify.db.execute(sql`SELECT 1`);
+      dbStatus = 'ok';
     }
     
     catch (error)
     {
-      return reply.status(503).send({ status: 'unhealthy', reason: error });
+      fastify.log.error(error);
+      dbStatus = 'unreachable';
     }
+
+    const health = {
+      status          : dbStatus === 'ok' ? 'ok' : 'unhealthy',
+      uptime_seconds  : Math.floor(process.uptime()),
+      timestamp       : new Date().toISOString(),
+      db              : dbStatus
+    };
+
+    const statusCode = health.status === 'ok' ? 200 : 503;
+
+    return reply.status(statusCode).send(health);
   });
 };
 
