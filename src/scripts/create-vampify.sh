@@ -1,32 +1,57 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-    echo "Usage: create-vampify <path_to_vampify_root>"
+# Parameter Check: Ensure project name and framework path are provided
+if [ -z "$1" ] ; then
+    echo "Usage: create-vampify <project_name>"
     exit 1
 fi
 
-VAMPIFY_ROOT=$(realpath "$1")
+# Project name and vampify submodule directory name.
+PROJECT_NAME=$1
+VAMPIFY_DIR_NAME="external/vampify"
+
+# Setup Project Directory
+mkdir -p "$PROJECT_NAME"
+
+# Change to the project directory and copy the path.
+cd "$PROJECT_NAME" || exit
 DEST_DIR=$(pwd)
 
+
+# Git Initialization
+git init
+
+# Add vampify as a submodule
+echo "📦 Adding Vampify as a submodule..."
+git submodule add https://github.com/babaliaris/vampify.git $VAMPIFY_DIR_NAME
+git submodule update --init --recursive
+
+# Create a relative and an absolute path for the vampify submodule location.
+VAMPIFY_RELATIVE="./$VAMPIFY_DIR_NAME"
+VAMPIFY_ROOT_ABS="$DEST_DIR/$VAMPIFY_DIR_NAME"
+
+
 echo "🧛 Cloning Vampify template to $DEST_DIR..."
+
 
 # 1. Create structure
 mkdir -p src/db src/routes src/plugins drizzle
 
 # 2. Copy the "Golden Files" from the sandbox
-cp "$VAMPIFY_ROOT/src/sandbox/app.ts" "./src/app.ts"
-cp "$VAMPIFY_ROOT/src/sandbox/server.ts" "./src/server.ts"
-cp "$VAMPIFY_ROOT/.env.development" .
-cp "$VAMPIFY_ROOT/drizzle.config.ts" .
-cp "$VAMPIFY_ROOT/src/sandbox/db/migrate.ts" "./src/db/migrate.ts"
+cp "$VAMPIFY_ROOT_ABS/src/sandbox/app.ts" "./src/app.ts"
+cp "$VAMPIFY_ROOT_ABS/src/sandbox/server.ts" "./src/server.ts"
+cp "$VAMPIFY_ROOT_ABS/.env.development" .
+cp "$VAMPIFY_ROOT_ABS/drizzle.config.ts" .
+cp "$VAMPIFY_ROOT_ABS/.gitignore" .
+cp "$VAMPIFY_ROOT_ABS/src/sandbox/db/migrate.ts" "./src/db/migrate.ts"
 echo "export const users = {};" > src/db/schema.ts
 
 # 3. Use Node to sync the package.json versions
 node -e "
 const fs = require('fs');
-const frameworkPkg = JSON.parse(fs.readFileSync('$VAMPIFY_ROOT/package.json', 'utf8'));
+const frameworkPkg = JSON.parse(fs.readFileSync('$VAMPIFY_ROOT_ABS/package.json', 'utf8'));
 const newPkg = {
-  name: 'vampify-app',
+  name: '$PROJECT_NAME',
   version: '1.0.0',
   type: 'module',
   scripts: {
@@ -72,12 +97,13 @@ cat <<EOF > tsconfig.json
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@vampify/core": ["$VAMPIFY_ROOT/src/core/vampify.ts"]
+      "@vampify/core": ["$VAMPIFY_RELATIVE/src/core/vampify.ts"]
     }
   },
-  "include": ["src/**/*.ts", "$VAMPIFY_ROOT/src/core/**/*.ts"],
+  "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts"],
   "exclude": ["node_modules", "dist", "test"]
 }
 EOF
 
-echo "✅ Template copied! Run 'npm install' to start."
+echo "✅ Project $PROJECT_NAME created successfully!"
+echo "👉 Next steps: cd $PROJECT_NAME && npm install"
