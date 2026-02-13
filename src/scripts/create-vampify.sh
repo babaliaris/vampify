@@ -38,11 +38,12 @@ echo "🧛 Cloning Vampify template to $DEST_DIR..."
 mkdir -p src/db src/routes src/plugins drizzle
 
 # Copy the "Golden Files" from the sandbox
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/app.ts" "./src/app.ts"
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/server.ts" "./src/server.ts"
 cp "$VAMPIFY_ROOT_ABS/src/create-template/.env.development" .
 cp "$VAMPIFY_ROOT_ABS/src/create-template/drizzle.config.ts" .
 cp "$VAMPIFY_ROOT_ABS/src/create-template/.gitignore" .
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/app.ts" "./src/app.ts"
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/server.ts" "./src/server.ts"
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/routes/root.ts" "./src/routes/root.ts"
 cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/migrate.ts" "./src/db/migrate.ts"
 cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/schema.ts" "./src/db/schema.ts"
 
