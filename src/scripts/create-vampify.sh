@@ -44,6 +44,7 @@ cp "$VAMPIFY_ROOT_ABS/src/create-template/.env.development" .
 cp "$VAMPIFY_ROOT_ABS/src/create-template/drizzle.config.ts" .
 cp "$VAMPIFY_ROOT_ABS/src/create-template/.gitignore" .
 cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/migrate.ts" "./src/db/migrate.ts"
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/schema.ts" "./src/db/schema.ts"
 
 # Add some important files as well.
 touch src/routes/.gitkeep
