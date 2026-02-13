@@ -34,19 +34,23 @@ VAMPIFY_ROOT_ABS="$DEST_DIR/$VAMPIFY_DIR_NAME"
 echo "🧛 Cloning Vampify template to $DEST_DIR..."
 
 
-# 1. Create structure
+# Create structure
 mkdir -p src/db src/routes src/plugins drizzle
 
-# 2. Copy the "Golden Files" from the sandbox
-cp "$VAMPIFY_ROOT_ABS/src/sandbox/app.ts" "./src/app.ts"
-cp "$VAMPIFY_ROOT_ABS/src/sandbox/server.ts" "./src/server.ts"
-cp "$VAMPIFY_ROOT_ABS/.env.development" .
-cp "$VAMPIFY_ROOT_ABS/drizzle.config.ts" .
-cp "$VAMPIFY_ROOT_ABS/.gitignore" .
-cp "$VAMPIFY_ROOT_ABS/src/sandbox/db/migrate.ts" "./src/db/migrate.ts"
-echo "export const users = {};" > src/db/schema.ts
+# Copy the "Golden Files" from the sandbox
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/app.ts" "./src/app.ts"
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/server.ts" "./src/server.ts"
+cp "$VAMPIFY_ROOT_ABS/src/create-template/.env.development" .
+cp "$VAMPIFY_ROOT_ABS/src/create-template/drizzle.config.ts" .
+cp "$VAMPIFY_ROOT_ABS/src/create-template/.gitignore" .
+cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/migrate.ts" "./src/db/migrate.ts"
 
-# 3. Use Node to sync the package.json versions
+# Add some important files as well.
+touch src/routes/.gitkeep
+touch src/plugins/.gitkeep
+touch src/db/.gitkeep
+
+# Use Node to sync the package.json versions
 node -e "
 const fs = require('fs');
 const frameworkPkg = JSON.parse(fs.readFileSync('$VAMPIFY_ROOT_ABS/package.json', 'utf8'));
@@ -56,8 +60,8 @@ const newPkg = {
   type: 'module',
   scripts: {
     'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
-    'build': 'rimraf dist && tsc && tsc-alias',
-    'start': 'cross-env NODE_ENV=production node dist/server.js',
+    'build': 'rimraf dist && tsc && tsc-alias && mkdir -p dist/src/routes dist/src/plugins',
+    'start': 'cross-env NODE_ENV=production node dist/src/server.js',
     'test': 'cross-env NODE_ENV=test node --test --import tsx \"src/**/*.{test,spec}.ts\"',
     'db:push': 'cross-env NODE_ENV=development drizzle-kit push',
     'db:generate': 'drizzle-kit generate',
@@ -69,7 +73,7 @@ const newPkg = {
 fs.writeFileSync('package.json', JSON.stringify(newPkg, null, 2));
 "
 
-# 4. Create the tsconfig.json
+# Create the tsconfig.json
 # This maps @/ to the local src, and @vampify/core to the submodule
 cat <<EOF > tsconfig.json
 {
@@ -79,7 +83,6 @@ cat <<EOF > tsconfig.json
     "moduleResolution": "NodeNext",
     "lib": ["ESNext"],
     "outDir": "dist",
-    "rootDir": "src",
 
     /* Strictness */
     "strict": true,
