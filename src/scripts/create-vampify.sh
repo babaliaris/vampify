@@ -1,8 +1,30 @@
 #!/bin/bash
 
+# --- Color Definitions ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color (Reset)
+
+# --- ASCII Banner ---
+clear
+echo -e "${MAGENTA}${BOLD}"
+echo " ██╗   ██╗ █████╗ ███╗   ███╗██████╗ ██╗███████╗██╗   ██╗"
+echo " ██║   ██║██╔══██╗████╗ ████║██╔══██╗██║██╔════╝╚██╗ ██╔╝"
+echo " ██║   ██║███████║██╔████╔██║██████╔╝██║█████╗   ╚████╔╝ "
+echo " ╚██╗ ██╔╝██╔══██║██║╚██╔╝██║██╔═══╝ ██║██╔══╝    ╚██╔╝  "
+echo "  ╚████╔╝ ██║  ██║██║ ╚═╝ ██║██║     ██║██║        ██║   "
+echo "   ╚═══╝  ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚═╝╚═╝        ╚═╝   "
+echo -e "${NC}"
+echo -e "${CYAN}             Vampify Framework Scaffolder${NC}\n"
+
 # Parameter Check: Ensure project name and framework path are provided
 if [ -z "$1" ] ; then
-    echo "Usage: create-vampify <project_name>"
+    echo "${RED}${BOLD}Usage${NC}: create-vampify <project_name>"
     exit 1
 fi
 
@@ -11,6 +33,7 @@ PROJECT_NAME=$1
 VAMPIFY_DIR_NAME="external/vampify"
 
 # Setup Project Directory
+echo -e "${CYAN}🚀 Initializing project: ${BOLD}$PROJECT_NAME${NC}"
 mkdir -p "$PROJECT_NAME"
 
 # Change to the project directory and copy the path.
@@ -22,7 +45,7 @@ DEST_DIR=$(pwd)
 git init
 
 # Add vampify as a submodule
-echo "📦 Adding Vampify as a submodule..."
+echo -e "${YELLOW}📦 Adding Vampify as a submodule...${NC}"
 git submodule add https://github.com/babaliaris/vampify.git $VAMPIFY_DIR_NAME
 git submodule update --init --recursive
 
@@ -31,28 +54,18 @@ VAMPIFY_RELATIVE="./$VAMPIFY_DIR_NAME"
 VAMPIFY_ROOT_ABS="$DEST_DIR/$VAMPIFY_DIR_NAME"
 
 
-echo "🧛 Cloning Vampify template to $DEST_DIR..."
+# Create drizzle folder.
+echo -e "${MAGENTA}📂 Preparing database directories...${NC}"
+mkdir -p drizzle
+touch drizzle/.gitkeep
 
+# Copy the project structure and files.
+echo -e "${MAGENTA}🧛 Applying Vampify template...${NC}"
+cp -rv "$VAMPIFY_ROOT_ABS/src/create-template/." "."| sed "s/^/  /"
 
-# Create structure
-mkdir -p src/db src/routes src/plugins drizzle
-
-# Copy the "Golden Files" from the sandbox
-cp "$VAMPIFY_ROOT_ABS/src/create-template/.env.development" .
-cp "$VAMPIFY_ROOT_ABS/src/create-template/drizzle.config.ts" .
-cp "$VAMPIFY_ROOT_ABS/src/create-template/.gitignore" .
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/app.ts" "./src/app.ts"
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/server.ts" "./src/server.ts"
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/routes/root.ts" "./src/routes/root.ts"
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/migrate.ts" "./src/db/migrate.ts"
-cp "$VAMPIFY_ROOT_ABS/src/create-template/src/db/schema.ts" "./src/db/schema.ts"
-
-# Add some important files as well.
-touch src/routes/.gitkeep
-touch src/plugins/.gitkeep
-touch src/db/.gitkeep
 
 # Use Node to sync the package.json versions
+echo -e "${BLUE}⚙️  Generating package.json...${NC}"
 node -e "
 const fs = require('fs');
 const frameworkPkg = JSON.parse(fs.readFileSync('$VAMPIFY_ROOT_ABS/package.json', 'utf8'));
@@ -77,6 +90,7 @@ fs.writeFileSync('package.json', JSON.stringify(newPkg, null, 2));
 
 # Create the tsconfig.json
 # This maps @/ to the local src, and @vampify/core to the submodule
+echo -e "${BLUE}⚙️  Configuring TypeScript aliases...${NC}"
 cat <<EOF > tsconfig.json
 {
   "compilerOptions": {
@@ -110,5 +124,8 @@ cat <<EOF > tsconfig.json
 }
 EOF
 
-echo "✅ Project $PROJECT_NAME created successfully!"
-echo "👉 Next steps: cd $PROJECT_NAME && npm install"
+echo -e "\n${GREEN}${BOLD}✅ Project $PROJECT_NAME created successfully!${NC}"
+echo -e "${YELLOW}👉 Next steps:${NC}"
+echo -e "   1. ${CYAN}cd $PROJECT_NAME${NC}"
+echo -e "   2. ${CYAN}npm install${NC}"
+echo -e "   3. ${CYAN}npm run dev${NC}\n"
