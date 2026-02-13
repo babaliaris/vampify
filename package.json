@@ -1,25 +1,21 @@
 {
   "name": "@vampify/core",
   "version": "1.0.0",
-  "description": "A customized Fastify backend framework",
+  "description": "An opinionated Fastify framework featuring Drizzle-ORM and custom directory architecture.",
   "license": "ISC",
   "author": "babaliaris",
   "type": "module",
-  "main": "dist/core/vampify.js",
-  "types": "./dist/core/vampify.d.ts",
-  "files": [
-    "dist/core",
-    "README.md"
-  ],
+  "main": "./src/sandbox/server.ts",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src/sandbox/server.ts",
-    "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "rimraf dist && tsc && tsc-alias",
+    "start": "cross-env NODE_ENV=production node dist/sandbox/server.js",
     "test": "cross-env NODE_ENV=test node --test --import tsx \"src/**/*.{test,spec}.ts\"",
     "db:push": "cross-env NODE_ENV=development drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate:dev": "cross-env NODE_ENV=development tsx src/sandbox/db/migrate.ts"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@fastify/autoload": "^6.3.1",
     "@fastify/env": "^5.0.3",
     "@fastify/sensible": "^6.0.4",
@@ -32,16 +28,6 @@
     "mysql2": "^3.16.3"
   },
   "devDependencies": {
-    "@fastify/autoload": "^6.3.1",
-    "@fastify/env": "^5.0.3",
-    "@fastify/sensible": "^6.0.4",
-    "@sinclair/typebox": "^0.34.48",
-    "cross-env": "^10.1.0",
-    "dotenv": "^17.2.4",
-    "drizzle-orm": "^0.45.1",
-    "fastify": "^5.7.4",
-    "fastify-plugin": "^5.1.0",
-    "mysql2": "^3.16.3",
     "@types/node": "^25.2.1",
     "drizzle-kit": "^0.31.8",
     "rimraf": "^6.1.2",

@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import {vampifyApp} from '@/sandbox/app.js';
+import {vampifyApp} from './app.js';
 
 // Create the Fastify Instance.
 const server = Fastify(

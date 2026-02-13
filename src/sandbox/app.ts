@@ -1,10 +1,9 @@
-import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
 import AutoLoad from '@fastify/autoload';
 import { join } from 'node:path';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-
-import { vampifyPlugin } from '../core/vampify.js';
+import { vampifyPlugin } from '@vampify/core';
 
 import * as schema from "@/sandbox/db/schema.js";
 

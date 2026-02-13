@@ -23,7 +23,8 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@vampify/core": ["./src/core/vampify.ts"],
     }
   },
   "include": ["src/**/*.ts"],
