@@ -14,9 +14,6 @@ export type DatabasePluginOptions = {
  */
 const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabasePluginOptions) =>
 {
-  // True if we run in development mode.
-  const isDevMode = process.env.NODE_ENV === "development";
-
   // Create the MYSQL connection pool.
   const pool = mysql.createPool({
     host: fastify.getEnvs().DB_HOST,
@@ -24,7 +21,7 @@ const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabaseP
     password: fastify.getEnvs().DB_PASS,
     database: fastify.getEnvs().DB_NAME,
     connectionLimit: fastify.getEnvs().DB_LIMIT,
-    debug: fastify.getEnvs().DB_DEBUG && isDevMode,
+    debug: fastify.getEnvs().DB_DEBUG && fastify.isDevMode(),
     dateStrings: true,
     bigNumberStrings: true
   });

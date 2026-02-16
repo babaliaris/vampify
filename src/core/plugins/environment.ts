@@ -29,12 +29,65 @@ export type VampifyEnvOptions = {
 const nodeEnv = process.env.NODE_ENV;
 const envPath = join(process.cwd(), `.env.${nodeEnv}`);
 
+
+/**
+ * Production Mode.
+ * 
+ * Checks if the process is run in production mode.
+ * 
+ * @returns true if in Production Mode.
+ */
+export function vampifyIsProdMode(): boolean
+{
+  if (process.env.NODE_ENV === "production")
+    return true;
+
+  return false;
+}
+
+
+/**
+ * Development Mode.
+ * 
+ * Checks if the process is run in development mode.
+ * 
+ * @returns true if in Development Mode.
+ */
+export function vampifyIsDevMode(): boolean
+{
+  if (process.env.NODE_ENV === "development")
+    return true;
+
+  return false;
+}
+
+
+/**
+ * Test Mode.
+ * 
+ * Checks if the process is run in test mode.
+ * 
+ * @returns true if in Testing Mode.
+ */
+export function vampifyIsTestMode(): boolean
+{
+  if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "production")
+    return true;
+
+  return false;
+}
+
 /**
  * Vampify environment variables loader plugin.
  */
 const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOptions) => 
 {
   fastify.log.info(`Registering: ${envPath}`);
+
+  // Decorate the mode checker functions.
+  fastify.decorate("isProdMode", vampifyIsProdMode);
+  fastify.decorate("isDevMode", vampifyIsDevMode);
+  fastify.decorate("isTestMode", vampifyIsTestMode);
 
   //Register @fastify/env
   await fastify.register(fastifyEnv, {
@@ -49,7 +102,34 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
 
 declare module 'fastify' {
   interface FastifyInstance {
-    getEnvs(): VampifyEnvType; 
+    getEnvs(): VampifyEnvType;
+
+    /**
+   * Production Mode.
+   * 
+   * Checks if the process is run in production mode.
+   * 
+   * @returns true if in Production Mode.
+   */
+    isProdMode(): boolean;
+
+    /**
+   * Development Mode.
+   * 
+   * Checks if the process is run in development mode.
+   * 
+   * @returns true if in Development Mode.
+   */
+    isDevMode(): boolean;
+
+    /**
+   * Test Mode.
+   * 
+   * Checks if the process is run in test mode.
+   * 
+   * @returns true if in Testing Mode.
+   */
+    isTestMode(): boolean;
   }
 }
 

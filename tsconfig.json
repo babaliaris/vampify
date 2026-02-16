@@ -6,8 +6,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ESNext"],
     "outDir": "dist",
-    "rootDir": "src",
-    
+  
     /* Strictness */
     "strict": true,
     "noImplicitAny": true,
@@ -25,8 +24,11 @@
     "paths": {
       "@/*": ["src/*"],
       "@vampify/core": ["./src/core/vampify.ts"],
+      "@vampify/test": ["./src/core/vampify-test.ts"],
     }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test"]
+  "exclude": [
+    "node_modules", "dist"
+  ]
 }

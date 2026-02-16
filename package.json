@@ -10,7 +10,8 @@
     "dev": "cross-env NODE_ENV=development tsx watch src/sandbox/server.ts",
     "build": "rimraf dist && tsc && tsc-alias",
     "start": "cross-env NODE_ENV=production node dist/sandbox/server.js",
-    "test": "cross-env NODE_ENV=test node --test --import tsx \"src/**/*.{test,spec}.ts\"",
+    "test:e2e": "cross-env NODE_ENV=test node --test --import tsx \"src/sandbox/tests/e2e/**/*.e2e.ts\"",
+    "test:unit": "cross-env NODE_ENV=test node --test --import tsx \"src/sandbox/tests/unit/**/*.{test,spec}.ts\"",
     "db:push": "cross-env NODE_ENV=development drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate:dev": "cross-env NODE_ENV=development tsx src/sandbox/db/migrate.ts"

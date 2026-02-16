@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status
 
 # --- Color Definitions ---
 RED='\033[0;31m'
@@ -9,6 +10,9 @@ MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color (Reset)
+
+# Make stderr red globally
+exec 2> >(while read -r line; do echo -e "${RED}${line}${NC}"; done)
 
 # --- ASCII Banner ---
 clear
@@ -77,7 +81,8 @@ const newPkg = {
     'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
     'build': 'rimraf dist && tsc && tsc-alias && mkdir -p dist/src/routes dist/src/plugins',
     'start': 'cross-env NODE_ENV=production node dist/src/server.js',
-    'test': 'cross-env NODE_ENV=test node --test --import tsx \"src/**/*.{test,spec}.ts\"',
+    'test:e2e': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/e2e/**/*.e2e.ts\"',
+    'test:unit': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/unit/**/*.{test,spec}.ts\"',
     'db:push': 'cross-env NODE_ENV=development drizzle-kit push',
     'db:generate': 'drizzle-kit generate',
     'db:migrate:dev': 'cross-env NODE_ENV=development tsx src/db/migrate.ts'
@@ -116,11 +121,12 @@ cat <<EOF > tsconfig.json
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@vampify/core": ["$VAMPIFY_RELATIVE/src/core/vampify.ts"]
+      "@vampify/core": ["$VAMPIFY_RELATIVE/src/core/vampify.ts"],
+      "@vampify/test": ["$VAMPIFY_RELATIVE/src/core/vampify-test.ts"],
     }
   },
   "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test"]
+  "exclude": ["node_modules", "dist"]
 }
 EOF
 
