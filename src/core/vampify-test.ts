@@ -1,5 +1,4 @@
 import Fastify, {FastifyInstance} from 'fastify';
-import { vampifyApp } from '../sandbox/app.js';
 import { before, after } from 'node:test';
 
 
@@ -8,8 +7,10 @@ import { before, after } from 'node:test';
  * 
  * This function will register the app entry point to a new
  * fastify instance and return it.
+ * 
+ * @param vampifyApp The vampify plugin function.
  */
-async function vampifyBoot(): Promise<FastifyInstance>
+async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
 {
   const fastify = Fastify({
     logger: false, // Silence logs during tests
@@ -48,7 +49,7 @@ async function vampifyBoot(): Promise<FastifyInstance>
  * 
  * @returns An object that contains the runInTransaction().
  */
-export function vampifySetupE2E()
+export function vampifySetupE2E(vampifyApp: any)
 {
   let fastify : FastifyInstance;
   let stockDB : any = null;
@@ -56,7 +57,7 @@ export function vampifySetupE2E()
 
   before(async () =>
   {
-    fastify = await vampifyBoot();
+    fastify = await vampifyBoot(vampifyApp);
   });
 
   after(async () =>
