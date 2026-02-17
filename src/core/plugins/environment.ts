@@ -14,7 +14,8 @@ export const VampifyEnvSchema = Type.Object(
   DB_PASS: Type.String(),
   DB_NAME: Type.String(),
   DB_LIMIT: Type.Integer(),
-  DB_DEBUG: Type.Boolean()
+  DB_DEBUG: Type.Boolean(),
+  JWT_SECRET: Type.String()
 });
 
 // Convert the Schema to a typscript object.
