@@ -4,7 +4,7 @@ import {vampifyApp} from './app.js';
 // Create the Fastify Instance.
 const server = Fastify(
 {
-  logger: process.env.NODE_ENV === 'development' ? {
+  logger: (process.env.NODE_ENV === 'development') ? {
     transport: {
       target: 'pino-pretty',
       options: {

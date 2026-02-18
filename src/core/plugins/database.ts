@@ -21,7 +21,7 @@ const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabaseP
     password: fastify.getEnvs().DB_PASS,
     database: fastify.getEnvs().DB_NAME,
     connectionLimit: fastify.getEnvs().DB_LIMIT,
-    debug: fastify.getEnvs().DB_DEBUG && fastify.isDevMode(),
+    debug: fastify.getEnvs().DB_DEBUG && fastify.vampifyIsDevMode(),
     dateStrings: true,
     bigNumberStrings: true
   });

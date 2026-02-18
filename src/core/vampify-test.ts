@@ -1,5 +1,13 @@
 import Fastify, {FastifyInstance} from 'fastify';
-import { before, after } from 'node:test';
+import { before, after, beforeEach } from 'node:test';
+import dotenv from "dotenv";
+import path from 'node:path';
+
+
+export interface VampifyE2ESuite {
+  readonly fastify: FastifyInstance;
+  runInTransaction(testBody: (fastify: FastifyInstance) => Promise<void>): Promise<void>;
+}
 
 
 /**
@@ -12,8 +20,25 @@ import { before, after } from 'node:test';
  */
 async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
 {
-  const fastify = Fastify({
-    logger: false, // Silence logs during tests
+  // Read environment variables.
+  dotenv.config({
+    path  : path.join(process.cwd(), ".env.test"),
+    debug : true
+  });
+
+  // Create the fastify instance.
+  const fastify = Fastify(
+    {
+      logger: process.env.LOGGING === "true" ? {
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          translateTime: 'HH:MM:ss Z',
+          ignore: 'pid,hostname',
+        },
+      },
+    } : false, // Disable logging.
+
     forceCloseConnections: true
   });
 
@@ -47,9 +72,9 @@ async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
  * THIS ASSUMES THAT EACH TEST IN THE DESCRIBE() BLOCK RUNS LINEARLY AND NOT
  * IN PARALLEL. DO NOT USE: test('...', { concurrency: true })
  * 
- * @returns An object that contains the runInTransaction().
+ * @returns An object that contains the runInTransaction() and fastify instance.
  */
-export function vampifySetupE2E(vampifyApp: any)
+export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
 {
   let fastify : FastifyInstance;
   let stockDB : any = null;
@@ -65,8 +90,31 @@ export function vampifySetupE2E(vampifyApp: any)
     if (fastify) await fastify.close();
   });
 
+  beforeEach(() =>
+  {
+    // If stockDB is not null, the final block did not run.
+    // inside a runInTransaction() call. This makes sure to
+    // restore the dirty fastify.db instance and testErr variable.
+    if (stockDB)
+    {
+      fastify.db  = stockDB;
+      stockDB     = null;
+      testErr     = null;
+    }
+  });
+
 
   return {
+
+    // Get the fastify instance.
+    get fastify(): FastifyInstance
+    {
+      if (!fastify)
+      {
+        throw new Error("Vampify: Fastify instance accessed before boot! Ensure you are calling this inside a test().");
+      }
+      return fastify;
+    },
 
     // Test Wrapper (Wraps the test in a transaction).
     async runInTransaction(testBody: (fastify: FastifyInstance) => Promise<void>)

@@ -6,7 +6,7 @@ import {vampifyApp} from "../../app.js";
 import { eq } from 'drizzle-orm';
 import {usersTable} from "../../db/schema.js";
 
-describe('Transaction Tests (DB)', () =>
+describe('Database Tests', () =>
 {
   const e2e_setup = vampifySetupE2E(vampifyApp);
 

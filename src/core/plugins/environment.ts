@@ -7,6 +7,8 @@ import { Type, Static } from '@sinclair/typebox'
 //Define the Schema.
 export const VampifyEnvSchema = Type.Object(
 {
+  RUN_MODE: Type.String(),
+  LOGGING: Type.Boolean(),
   SERVER_PORT: Type.Number(),
   DB_URL: Type.String(),
   DB_HOST: Type.String(),
@@ -15,7 +17,9 @@ export const VampifyEnvSchema = Type.Object(
   DB_NAME: Type.String(),
   DB_LIMIT: Type.Integer(),
   DB_DEBUG: Type.Boolean(),
-  JWT_SECRET: Type.String()
+  JWT_SECRET: Type.String(),
+  JWT_EXPIRES: Type.Integer(),
+  AUTH_REDIRECT: Type.String()
 });
 
 // Convert the Schema to a typscript object.
@@ -72,7 +76,7 @@ export function vampifyIsDevMode(): boolean
  */
 export function vampifyIsTestMode(): boolean
 {
-  if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "production")
+  if (process.env.NODE_ENV === "test")
     return true;
 
   return false;
@@ -86,16 +90,16 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
   fastify.log.info(`Registering: ${envPath}`);
 
   // Decorate the mode checker functions.
-  fastify.decorate("isProdMode", vampifyIsProdMode);
-  fastify.decorate("isDevMode", vampifyIsDevMode);
-  fastify.decorate("isTestMode", vampifyIsTestMode);
+  fastify.decorate("vampifyIsProdMode", vampifyIsProdMode);
+  fastify.decorate("vampifyIsDevMode", vampifyIsDevMode);
+  fastify.decorate("vampifyIsTestMode", vampifyIsTestMode);
 
   //Register @fastify/env
   await fastify.register(fastifyEnv, {
     schema: VampifyEnvSchema,
     dotenv: {
       path: envPath,
-      debug: true
+      debug: vampifyIsDevMode()
     }
   });
 });
@@ -103,6 +107,14 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
 
 declare module 'fastify' {
   interface FastifyInstance {
+
+    /**
+   * Environment Variables Getter.
+   * 
+   * Get the environment variables.
+   * 
+   * @returns The environment variables object.
+   */
     getEnvs(): VampifyEnvType;
 
     /**
@@ -112,7 +124,7 @@ declare module 'fastify' {
    * 
    * @returns true if in Production Mode.
    */
-    isProdMode(): boolean;
+    vampifyIsProdMode(): boolean;
 
     /**
    * Development Mode.
@@ -121,7 +133,7 @@ declare module 'fastify' {
    * 
    * @returns true if in Development Mode.
    */
-    isDevMode(): boolean;
+    vampifyIsDevMode(): boolean;
 
     /**
    * Test Mode.
@@ -130,7 +142,7 @@ declare module 'fastify' {
    * 
    * @returns true if in Testing Mode.
    */
-    isTestMode(): boolean;
+    vampifyIsTestMode(): boolean;
   }
 }
 

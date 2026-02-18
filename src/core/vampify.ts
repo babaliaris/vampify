@@ -1,8 +1,9 @@
 import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fastifySensible from "@fastify/sensible";
 import vampifyEnvPlugin from './plugins/environment.js';
 import vampifyDatabasePlugin from './plugins/database.js';
-import fastifySensible from "@fastify/sensible";
+import vampifyAuthenticationPlugin from './plugins/auth.js';
 
 export type VampifyPluginOptions = {
   schema: Record<string, unknown>
@@ -18,5 +19,8 @@ export const vampifyPlugin = fp( async (fastify: FastifyInstance, opts: VampifyP
 
   // Register Sensible.
   await fastify.register(fastifySensible);
+
+  // Register authentication plugin.
+  await fastify.register(vampifyAuthenticationPlugin);
 
 });
