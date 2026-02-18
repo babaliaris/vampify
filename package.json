@@ -8,7 +8,7 @@
   "main": "./src/sandbox/server.ts",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src/sandbox/server.ts",
-    "build": "rimraf dist && tsc && tsc-alias",
+    "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "cross-env NODE_ENV=production node dist/sandbox/server.js",
     "test:e2e": "cross-env NODE_ENV=test node --test --import tsx \"src/sandbox/tests/e2e/**/*.e2e.ts\"",
     "test:unit": "cross-env NODE_ENV=test node --test --import tsx \"src/sandbox/tests/unit/**/*.{test,spec}.ts\"",

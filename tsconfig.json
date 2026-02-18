@@ -5,7 +5,6 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ESNext"],
-    "outDir": "dist",
   
     /* Strictness */
     "strict": true,
@@ -24,7 +23,10 @@
     "paths": {
       "@/*": ["src/*"],
       "@vampify/core": ["./src/core/vampify.ts"],
-      "@vampify/test": ["./src/core/vampify-test.ts"],
+      "@vampify/env": ["./src/core/plugins/environment.ts"],
+      "@vampify/auth": ["./src/core/plugins/auth.ts"],
+      "@vampify/literals": ["./src/core/vampify-literals.ts"],
+      "@vampify/test": ["./src/core/vampify-test.ts"]
     }
   },
   "include": ["src/**/*.ts"],

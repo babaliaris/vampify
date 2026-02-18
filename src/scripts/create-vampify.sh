@@ -79,7 +79,7 @@ const newPkg = {
   type: 'module',
   scripts: {
     'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
-    'build': 'rimraf dist && tsc && tsc-alias && mkdir -p dist/src/routes dist/src/plugins',
+    'build': 'rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && mkdir -p dist/src/routes dist/src/plugins',
     'start': 'cross-env NODE_ENV=production node dist/src/server.js',
     'test:e2e': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/e2e/**/*.e2e.ts\"',
     'test:unit': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/unit/**/*.{test,spec}.ts\"',
@@ -95,7 +95,7 @@ fs.writeFileSync('package.json', JSON.stringify(newPkg, null, 2));
 
 # Create the tsconfig.json
 # This maps @/ to the local src, and @vampify/core to the submodule
-echo -e "${BLUE}⚙️  Configuring TypeScript aliases...${NC}"
+echo -e "${BLUE}⚙️  Generating tsconfig.json...${NC}"
 cat <<EOF > tsconfig.json
 {
   "compilerOptions": {
@@ -127,6 +127,25 @@ cat <<EOF > tsconfig.json
   },
   "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts"],
   "exclude": ["node_modules", "dist"]
+}
+EOF
+
+
+# Create the tsconfig.build.json
+echo -e "${BLUE}⚙️  Generating tsconfig.build.json...${NC}"
+cat <<EOF > tsconfig.build.json
+{
+  "extends": "./tsconfig.json",
+
+  "compilerOptions": {
+    "outDir": "dist",
+    "sourceMap": false
+  },
+
+  "exclude": [
+    "node_modules", "dist", "src/tests","$VAMPIFY_RELATIVE/src/create-template",
+    "$VAMPIFY_RELATIVE/src/sandbox", "$VAMPIFY_RELATIVE/src/core/vampify-test.ts"
+  ]
 }
 EOF
 
