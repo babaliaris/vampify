@@ -7,9 +7,6 @@ import { Type, Static } from '@sinclair/typebox'
 //Define the Schema.
 export const VampifyEnvSchema = Type.Object(
 {
-  RUN_MODE: Type.String(),
-  LOGGING: Type.Boolean(),
-  SERVER_PORT: Type.Number(),
   DB_URL: Type.String(),
   DB_HOST: Type.String(),
   DB_USER: Type.String(),
@@ -19,11 +16,33 @@ export const VampifyEnvSchema = Type.Object(
   DB_DEBUG: Type.Boolean(),
   JWT_SECRET: Type.String(),
   JWT_EXPIRES: Type.Integer(),
-  AUTH_REDIRECT: Type.String()
+
+  AUTH_REDIRECT: Type.String(),
+  RUN_MODE: Type.String(),
+  LOGGING: Type.Boolean(),
+  LOG_METHOD: Type.String(),
+  SERVER_PORT: Type.Number()
 });
 
 // Convert the Schema to a typscript object.
-export type VampifyEnvType = Static<typeof VampifyEnvSchema>
+type VampifyEnvType = Static<typeof VampifyEnvSchema>
+
+// Create a raw type as well, that everything is a string.
+type VampifyRawEnv = {
+  [K in keyof VampifyEnvType]: string;
+};
+
+// Environment Literals.
+export const VAMPIFY_ENV_LITERALS = {
+  RUN_MODE_DEV      : "development",
+  RUN_MODE_PROD     : "production",
+  RUN_MODE_TEST     : "test",
+  LOG_METHOD_PRETTY : "pretty",
+  LOG_METHOD_ROLL   : "roll",
+  LOG_METHOD_STDOUT : "stdout",
+  TRUE              : "true",
+  FALSE             : "false"
+};
 
 // Plugin Options.
 export type VampifyEnvOptions = {
@@ -44,7 +63,7 @@ const envPath = join(process.cwd(), `.env.${nodeEnv}`);
  */
 export function vampifyIsProdMode(): boolean
 {
-  if (process.env.NODE_ENV === "production")
+  if (process.env.NODE_ENV === VAMPIFY_ENV_LITERALS.RUN_MODE_PROD)
     return true;
 
   return false;
@@ -60,7 +79,7 @@ export function vampifyIsProdMode(): boolean
  */
 export function vampifyIsDevMode(): boolean
 {
-  if (process.env.NODE_ENV === "development")
+  if (process.env.NODE_ENV === VAMPIFY_ENV_LITERALS.RUN_MODE_DEV)
     return true;
 
   return false;
@@ -76,7 +95,7 @@ export function vampifyIsDevMode(): boolean
  */
 export function vampifyIsTestMode(): boolean
 {
-  if (process.env.NODE_ENV === "test")
+  if (process.env.NODE_ENV === VAMPIFY_ENV_LITERALS.RUN_MODE_TEST)
     return true;
 
   return false;
@@ -87,7 +106,7 @@ export function vampifyIsTestMode(): boolean
  */
 const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOptions) => 
 {
-  fastify.log.info(`Registering: ${envPath}`);
+  fastify.log.info(`Env Load Path: ${envPath}`);
 
   // Decorate the mode checker functions.
   fastify.decorate("vampifyIsProdMode", vampifyIsProdMode);
@@ -97,10 +116,8 @@ const vampifyEnvPlugin = fp(async (fastify: FastifyInstance, opts: VampifyEnvOpt
   //Register @fastify/env
   await fastify.register(fastifyEnv, {
     schema: VampifyEnvSchema,
-    dotenv: {
-      path: envPath,
-      debug: vampifyIsDevMode()
-    }
+    dotenv: false, // dotenv runs at server.ts
+    data  : process.env
   });
 });
 
@@ -143,6 +160,15 @@ declare module 'fastify' {
    * @returns true if in Testing Mode.
    */
     vampifyIsTestMode(): boolean;
+  }
+}
+
+
+// Declare globaly the process.env object.
+declare global {
+  namespace NodeJS {
+    // We extend the existing ProcessEnv interface
+    interface ProcessEnv extends VampifyRawEnv {}
   }
 }
 

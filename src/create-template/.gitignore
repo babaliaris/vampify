@@ -1,6 +1,7 @@
 # Directories.
 dist/
 node_modules/
+logs/
 
 # Files.
 .env.production

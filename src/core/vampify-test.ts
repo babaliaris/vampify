@@ -1,5 +1,6 @@
 import Fastify, {FastifyInstance} from 'fastify';
 import { before, after, beforeEach } from 'node:test';
+import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
 import dotenv from "dotenv";
 import path from 'node:path';
 
@@ -29,7 +30,7 @@ async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
   // Create the fastify instance.
   const fastify = Fastify(
     {
-      logger: process.env.LOGGING === "true" ? {
+      logger: process.env.LOGGING === VAMPIFY_ENV_LITERALS.TRUE ? {
       transport: {
         target: 'pino-pretty',
         options: {

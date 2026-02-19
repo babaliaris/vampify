@@ -171,10 +171,6 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
 });
 
 
-export default vampifyAuthenticationPlugin;
-
-
-
 declare module 'fastify' {
 
   interface FastifyInstance {
@@ -225,3 +221,7 @@ declare module 'fastify' {
     vampifySignPayload(user_id: string): Promise<void>;
   }
 }
+
+
+export default vampifyAuthenticationPlugin;
+
