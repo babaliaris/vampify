@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import {vampifyApp} from './app.js';
 import { VAMPIFY_ENV_LITERALS } from '@vampify/env';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import dotenv from "dotenv";
 import path from "node:path";
 
@@ -15,7 +16,7 @@ dotenv.config({
 // Create the fastify instance.
 const server = Fastify({
   logger: getLoggerConfig()
-});
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 
 

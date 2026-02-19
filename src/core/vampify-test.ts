@@ -1,6 +1,7 @@
 import Fastify, {FastifyInstance} from 'fastify';
 import { before, after, beforeEach } from 'node:test';
 import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import dotenv from "dotenv";
 import path from 'node:path';
 
@@ -41,7 +42,7 @@ async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
     } : false, // Disable logging.
 
     forceCloseConnections: true
-  });
+  }).withTypeProvider<TypeBoxTypeProvider>();
 
   // Register the main application logic (Entry Point).
   await fastify.register(vampifyApp);
