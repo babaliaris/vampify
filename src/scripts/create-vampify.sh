@@ -78,14 +78,14 @@ const newPkg = {
   version: '1.0.0',
   type: 'module',
   scripts: {
-    'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
     'build': 'rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && mkdir -p dist/src/routes dist/src/plugins',
     'start': 'cross-env NODE_ENV=production node dist/src/server.js',
     'test:e2e': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/e2e/**/*.e2e.ts\"',
     'test:unit': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/unit/**/*.{test,spec}.ts\"',
-    'db:push': 'cross-env NODE_ENV=development drizzle-kit push',
-    'db:generate': 'drizzle-kit generate',
-    'db:migrate:dev': 'cross-env NODE_ENV=development tsx src/db/migrate.ts'
+    'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
+    'db:dev:push': 'cross-env NODE_ENV=development drizzle-kit push',
+    'db:dev:generate': 'cross-env NODE_ENV=development drizzle-kit generate',
+    'db:dev:migrate': 'cross-env NODE_ENV=development tsx src/db/migrate.ts'
   },
   dependencies: frameworkPkg.dependencies,
   devDependencies: frameworkPkg.devDependencies
