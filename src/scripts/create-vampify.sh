@@ -123,6 +123,9 @@ cat <<EOF > tsconfig.json
       "@/*": ["src/*"],
       "@vampify/core": ["$VAMPIFY_RELATIVE/src/core/vampify.ts"],
       "@vampify/test": ["$VAMPIFY_RELATIVE/src/core/vampify-test.ts"],
+      "@vampify/env": ["$VAMPIFY_RELATIVE/src/core/plugins/environment.ts"],
+      "@vampify/auth": ["$VAMPIFY_RELATIVE/src/core/plugins/auth.ts"],
+      "@vampify/literals": ["$VAMPIFY_RELATIVE/src/core/vampify-literals.ts"]
     }
   },
   "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts"],
