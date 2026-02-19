@@ -83,11 +83,10 @@ const newPkg = {
     'test:e2e': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/e2e/**/*.e2e.ts\"',
     'test:unit': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/unit/**/*.{test,spec}.ts\"',
     'dev': 'cross-env NODE_ENV=development tsx watch src/server.ts',
-    'db:push': 'npm run db:dev:push && npm run db:test:push',
-    'db:dev:push': 'cross-env NODE_ENV=development drizzle-kit push',
-    'db:test:push': 'cross-env NODE_ENV=test drizzle-kit push',
-    'db:dev:generate': 'cross-env NODE_ENV=development drizzle-kit generate',
-    'db:dev:migrate': 'cross-env NODE_ENV=development tsx src/db/migrate.ts'
+    'db:migrate': 'npm run db:generate && npm run db:dev:migrate && npm run db:test:migrate',
+    'db:generate': 'cross-env NODE_ENV=development drizzle-kit generate',
+    'db:dev:migrate': 'cross-env NODE_ENV=development tsx src/db/migrate.ts',
+    'db:test:migrate': 'cross-env NODE_ENV=test tsx src/db/migrate.ts'
   },
   dependencies: frameworkPkg.dependencies,
   devDependencies: frameworkPkg.devDependencies
