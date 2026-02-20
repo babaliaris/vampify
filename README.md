@@ -1,6 +1,6 @@
 # 🧛 Vampify
 
-An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2), a custom directory architecture and more!
+An opinionated [Fastify](https://fastify.dev/) [Typescript](https://www.typescriptlang.org/) based framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2), a custom directory architecture and more!
 
 Vampify is a strictly opinionated, high-performance wrapper for Fastify, engineered for developers who want a production-ready architecture without the "analysis paralysis" of choosing a stack.
 
