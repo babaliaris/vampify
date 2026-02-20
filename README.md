@@ -1,8 +1,30 @@
-# Vampify
+# 🧛 Vampify Framework
 
-An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2) and custom directory architecture.
+An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2), a custom directory architecture and more!
+
+Vampify is a strictly opinionated, high-performance wrapper for Fastify, engineered for developers who want a production-ready architecture without the "analysis paralysis" of choosing a stack.
+
+Unlike frameworks that offer abstraction at the cost of complexity, Vampify provides a hard-coded, optimized ecosystem. You don't choose the pieces; you just build the features.
 
 ---
+
+## 🧱 The Locked Stack
+
+*Vampify is built on a non-negotiable, deeply integrated foundation*:
+
++ **Core**: Fastify with native TypeBoxTypeProvider integration for end-to-end type safety.
+
++ **Database**: MySQL2 (Driver) + Drizzle-ORM.
+
++ **Instance**: Custom **VampifyInstance** (Extended FastifyInstance) with **db** decoration & **TypeBoxTypeProvider** pre-configured.
+
++ **Error Handling**: A unified, **hard-coded** handler for MySQL/MariaDB constraints and Typebox validations.
+
++ **Testing**: Built-in vampify-test suite featuring automatic transaction-based testing with hot-swappable DB instances to ensure data isolation.
+
+> [!IMPORTANT]
+> This is not a generic framework. Vampify is designed for teams who want to use this specific stack with zero configuration. **If you need PostgreSQL or a different validation library, this is not the tool for you**.
+
 
 ## 🚀 Quick Start
 
