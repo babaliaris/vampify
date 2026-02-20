@@ -31,7 +31,7 @@ Unlike frameworks that offer abstraction at the cost of complexity, Vampify prov
 + **Testing**: Built-in vampify-test suite featuring automatic transaction-based testing with hot-swappable DB instances to ensure data isolation.
 
 > [!IMPORTANT]
-> This is not a generic framework. Vampify is designed for teams who want to use this specific stack with zero configuration. **If you need PostgreSQL or a different validation library, this is not the tool for you**.
+> This is not a generic framework. Vampify is designed for teams who want to use this specific stack with *almost* zero configuration. **If you need PostgreSQL or a different validation library, this is not the tool for you**.
 
 
 ## 🚀 Quick Start
