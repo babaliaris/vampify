@@ -9,7 +9,7 @@ Unlike frameworks that offer abstraction at the cost of complexity, Vampify prov
 ### 📍 Quick Navigation
 * [🧱 The Locked Stack](#-the-locked-stack)
 * [🚀 Quick Start](#-quick-start)
-* [🚀 Install & Run](#-install-&-run)
+* [🚀 Install & Run](#-install-and-run)
 * [🔄 Updating the Framework](#-updating-the-framework)
 * [🛠️ Architecture](#-architecture)
 * [📜 Available Scripts](#-available-scripts)
@@ -45,7 +45,7 @@ Run the creation script from your terminal:
 This will create a new project template called `my-new-api`, and will include vampify as a
 git submodule located at `external/vampify`.
 
-## 🚀 Install & Run
+## 🚀 Install And Run
 ```bash
 cd my-new-api
 npm install
