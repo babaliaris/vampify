@@ -14,6 +14,7 @@ Unlike frameworks that offer abstraction at the cost of complexity, Vampify prov
 * [🛠️ Architecture](#%EF%B8%8F-architecture)
 * [🗄️ Database Setup](#%EF%B8%8F-database-setup)
 * [📜 Available Scripts](#-available-scripts)
+* [🧪 Transaction Based Testing](#-transaction-based-testing)
 
 ## 🧱 The Locked Stack
 
@@ -158,3 +159,84 @@ Runs unit tests.
 ```bash
 npm run test:unit
 ```
+
+## 🧪 Transaction Based Testing
+
+Vampify includes a custom testing utility, **@vampify/test**, specifically designed to handle database state. Vampify runs each test inside a database transaction that automatically rolls back.
+
+When you use `runInTransaction(async (fastify)=>...)`, Vampify provides a fastify instance where **fastify.db** is redirected to the active transaction. Any code (including your actual API logic) using fastify.db will participate in that transaction.
+
+```typescript
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
+import { vampifySetupE2E } from "@vampify/test";
+import { vampifyApp } from "@/sandbox/app.js";
+import { usersTable } from "../../db/schema.js";
+import { eq } from 'drizzle-orm';
+
+describe('Database Isolation Tests', () =>
+{
+  const e2e_suite = vampifySetupE2E(vampifyApp);
+
+  test('Should insert a user safely', async () =>
+  {
+    await e2e_suite.runInTransaction(async (fastify) =>
+    {
+      // Insert data using the transaction-wrapped fastify.db
+      const res = await fastify.db.insert(usersTable).values({ 
+        name: "Nick", 
+        age: 30, 
+        email: "nick@vampify.io" 
+      });
+      
+      assert(res[0].insertId > 0);
+
+      // Data exists within this transaction
+      const select = await fastify.db.select().from(usersTable).where(eq(usersTable.name, "Nick"));
+      assert.strictEqual(select.length, 1);
+    });
+    // After the block above, the transaction ROLLS BACK automatically.
+  });
+
+  test('Database should be clean for the next test', async () =>
+  {
+    await e2e_suite.runInTransaction(async (fastify) =>
+    {
+      const select = await fastify.db.select().from(usersTable).where(eq(usersTable.name, "Nick"));
+      // Assert that "Nick" does not exist in the DB
+      assert.strictEqual(select.length, 0);
+    });
+  });
+});
+```
+
+### End-to-End API Testing
+
+Vampify leverages Fastify's **.inject()** to test your endpoints without needing to bind to a network port, ensuring your tests run at maximum speed.
+
+```typescript
+test('Should fail if the Digital Footprint is compromised', async () =>
+{
+  // Login with a specific User-Agent
+  const loginRes = await e2e_suite.fastify.inject({
+    method: 'GET',
+    url: '/credentials-login',
+    headers: { 'user-agent': 'VampireBrowser/1.0' }
+  });
+
+  const cookie = loginRes.headers['set-cookie'];
+
+  // Attempt to use that cookie from a DIFFERENT User-Agent
+  const maliciousRes = await e2e_suite.fastify.inject({
+    method: 'GET',
+    url: '/credentials-check-payload',
+    headers: {
+      cookie: Array.isArray(cookie) ? cookie[0] : cookie,
+      'user-agent': 'HackerBrowser/2.0' // Unauthorized!
+    }
+  });
+
+  assert.strictEqual(maliciousRes.statusCode, 401);
+});
+```
+
