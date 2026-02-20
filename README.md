@@ -6,7 +6,13 @@ Vampify is a strictly opinionated, high-performance wrapper for Fastify, enginee
 
 Unlike frameworks that offer abstraction at the cost of complexity, Vampify provides a hard-coded, optimized ecosystem. You don't choose the pieces; you just build the features.
 
----
+### 📍 Quick Navigation
+* [The Locked Stack](#-🧱-the-locked-stack)
+* [Custom Architecture](#-custom-architecture)
+* [Unified Error Handling](#-unified-error-handling)
+* [Transaction-Based Testing](#-transaction-based-testing)
+* [Getting Started](#-getting-started)
+* [Available Scripts](#-available-scripts)
 
 ## 🧱 The Locked Stack
 
