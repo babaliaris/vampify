@@ -1,4 +1,4 @@
-# 🧛 Vampify Framework
+# 🧛 Vampify
 
 An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2), a custom directory architecture and more!
 
