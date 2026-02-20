@@ -39,13 +39,12 @@ Unlike frameworks that offer abstraction at the cost of complexity, Vampify prov
 The fastest way to **sink your teeth** into a new project is using the automated scaffolder.
 
 ### 1. Create a New Project
-Run the creation script from your terminal:
+Download [create-vampify.sh](src/scripts/create-vampify.sh) (*You don't have to clone this repo*) and run:
 ```bash
-./<vampify_root>/src/scripts/create-vampify.sh my-new-api
+create-vampify.sh my-new-api
 ```
 
-This will create a new project template called `my-new-api`, and will include vampify as a
-git submodule located at `external/vampify`.
+This will create a new project template called `my-new-api` that includes vampify as a git submodule, located at `external/vampify`.
 
 ## 🚀 Install And Run
 ```bash
