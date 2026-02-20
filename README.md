@@ -1,6 +1,6 @@
 # Vampify
 
-An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/) and custom directory architecture.
+An opinionated [Fastify](https://fastify.dev/) framework featuring [Drizzle-ORM](https://orm.drizzle.team/), [mysql2/promise](https://www.npmjs.com/package/mysql2) and custom directory architecture.
 
 ---
 
@@ -11,10 +11,11 @@ The fastest way to **sink your teeth** into a new project is using the automated
 ### 1. Create a New Project
 Run the creation script from your terminal:
 ```bash
-./create-vampify.sh my-new-api
+./<vampify_root>/src/scripts/create-vampify.sh my-new-api
 ```
 
-The script is located under `src/scripts/create-vampify.sh`
+This will create a new project template called `my-new-api`, and will include vampify as a
+git submodule located at `external/vampify`.
 
 ## 🚀 Install & Run
 ```bash
@@ -24,6 +25,9 @@ npm run dev
 ```
 
 🔄 Updating the Framework
+> [!CAUTION]
+> **Proceed with caution:** Updating to the latest version may introduce breaking changes. Ensure you have backed up your work or are working on a separate branch before merging.
+
 Since Vampify is a submodule, updating to the latest version of the core is easy:
 ```bash
 git submodule update --remote --merge
@@ -37,7 +41,58 @@ Vampify projects follow a strict, clean structure to ensure your codebase stays 
 + `src/routes/`: Auto-loaded routes.
 + `src/plugins/`: Custom Fastify plugins (Auto-loaded).
 + `src/db/`: Drizzle schema and migration logic.
-+ `external/vampify/`: The framework core (git submodule).
++ `src/tests/e2e/`: End-to-end tests.
++ `src/tests/unit/`: Unit tests.
++ `drizzle/`: Drizzle migrations container.
++ `dist/`: Production files (after building the project `npm run build`).
+
+## 🗄️ Database Setup
+Vampify requires two separate databases to keep your development data isolated from your automated tests.
+
+### 1. Create the Databases
+
+Run the following commands in your MySQL terminal (or use a GUI tool like TablePlus or DBeaver) to initialize your local environment:
+```bash
+CREATE DATABASE <database_name>_dev;
+CREATE DATABASE <database_name>_test;
+```
+
+### 2. Configure Environment Variables
+
+You will find **.env.development** and **.env.test** files in the root directory. Update both files with your local credentials.
+
+> [!IMPORTANT]
+> Ensure the DB_NAME and DB_URL in .env.test point to your test database, while .env.development points to your dev database.
+
+Example Configuration (.env.development):
+```bash
+SERVER_PORT=3000
+
+# Database Configuration
+DB_URL=mysql://root:0401@localhost:3306/<database_name>_dev
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=0401
+DB_NAME=<database_name>_dev
+DB_LIMIT=10
+DB_DEBUG=false
+
+# Authentication & Logging
+JWT_SECRET=just_a_secret_key
+JWT_EXPIRES=60
+AUTH_REDIRECT=/credentials-login
+RUN_MODE=development
+LOGGING=true
+LOG_METHOD=pretty
+```
+
+### 3. Production Environment
+
+The template does not include a .env.production file by default. To deploy to production:
+
++ Copy the .env.development file.
++ Rename it to .env.production.
++ Update the values (especially JWT_SECRET and DB_PASS) to secure, production-grade credentials.
 
 ## 📜 Available Scripts
 Starts the server in development mode with hot-reload (tsx).
@@ -55,17 +110,22 @@ Runs the compiled production build.
 npm run start
 ```
 
-Pushes your Drizzle schema changes to the database.
-```bash
-npm run db:push
-```
-
-Runs database migrations.
-```bash
-npm run db:migrate:dev
-```
-
-Generate migrations under: `drizzle`.
+Generate migrations under: `drizzle/`.
 ```bash
 npm run db:generate
+```
+
+Migrate the new schema changes to both the development and testing databases.
+```bash
+npm run db:migrate
+```
+
+Runs end-to-end tests.
+```bash
+npm run test:e2e
+```
+
+Runs unit tests.
+```bash
+npm run test:unit
 ```
