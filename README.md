@@ -52,7 +52,7 @@ npm install
 npm run dev
 ```
 
-🔄 Updating The Framework
+## 🔄 Updating The Framework
 > [!CAUTION]
 > **Proceed with caution:** Updating to the latest version may introduce breaking changes. Ensure you have backed up your work or are working on a separate branch before merging.
 
