@@ -12,6 +12,7 @@ Unlike frameworks that offer abstraction at the cost of complexity, Vampify prov
 * [🚀 Install & Run](#-install-and-run)
 * [🔄 Updating the Framework](#-updating-the-framework)
 * [🛠️ Architecture](#-architecture)
+* [🗄️ Database Setup](#-database-setup)
 * [📜 Available Scripts](#-available-scripts)
 
 ## 🧱 The Locked Stack
