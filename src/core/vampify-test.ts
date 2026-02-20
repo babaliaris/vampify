@@ -1,4 +1,4 @@
-import Fastify, {FastifyInstance} from 'fastify';
+import Fastify from 'fastify';
 import { VampifyInstance } from "./vampify-literals.js";
 import { before, after, beforeEach } from 'node:test';
 import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
@@ -9,7 +9,7 @@ import path from 'node:path';
 
 export interface VampifyE2ESuite {
   readonly fastify: VampifyInstance;
-  runInTransaction(testBody: (fastify: FastifyInstance) => Promise<void>): Promise<void>;
+  runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>): Promise<void>;
 }
 
 

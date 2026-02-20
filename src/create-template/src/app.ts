@@ -28,7 +28,7 @@ export const vampifyApp = fp( async (fastify: VampifyInstance, opts: FastifyPlug
 
 // Extend the Fastify type system.
 declare module 'fastify' {
-  interface VampifyInstance {
+  interface FastifyInstance {
     db: MySql2Database<typeof schema>;
   }
 }

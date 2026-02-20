@@ -2,7 +2,8 @@ import fp from "fastify-plugin";
 import { drizzle } from "drizzle-orm/mysql2";
 import { sql } from "drizzle-orm";
 import mysql from "mysql2/promise";
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import { FastifyPluginOptions } from "fastify";
+import { VampifyInstance } from "../vampify-literals.js";
 
 export type DatabasePluginOptions = {
   schema: Record<string, unknown>
@@ -12,7 +13,7 @@ export type DatabasePluginOptions = {
 /**
  * Vampify database plugin (drizzle orm).
  */
-const vampifyDatabasePlugin = fp(async (fastify: FastifyInstance, opt: DatabasePluginOptions) =>
+const vampifyDatabasePlugin = fp(async (fastify: VampifyInstance, opt: DatabasePluginOptions) =>
 {
   // Create the MYSQL connection pool.
   const pool = mysql.createPool({
