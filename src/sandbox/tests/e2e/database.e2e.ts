@@ -1,6 +1,6 @@
 import { test, describe} from 'node:test';
 import assert from 'node:assert';
-import { FastifyInstance } from 'fastify';
+import { VampifyInstance } from "@/core/vampify-literals.js";
 import { vampifySetupE2E } from "@vampify/test";
 import {vampifyApp} from "@/sandbox/app.js";
 
@@ -13,7 +13,7 @@ describe('Database Tests', () =>
 
   test('Test Transaction Insert', async () =>
   {
-    await e2e_suite.runInTransaction(async (fastify: FastifyInstance)=>
+    await e2e_suite.runInTransaction(async (fastify: VampifyInstance)=>
     {
       // Insert a user and check for success.
       const insert_result = await fastify.db.insert(usersTable).values({name: "Nick", age: 30, email: "something@gmail.com"});
@@ -28,7 +28,7 @@ describe('Database Tests', () =>
 
   test('Test Transaction Cleared', async () =>
   {
-    await e2e_suite.runInTransaction(async (fastify: FastifyInstance)=>
+    await e2e_suite.runInTransaction(async (fastify: VampifyInstance)=>
     {
       // Previous 'Test Transaction' should have rolled back, so the entry should no exist.
       let select_result = await fastify.db.select().from(usersTable).where(eq(usersTable.name, "Nick"));

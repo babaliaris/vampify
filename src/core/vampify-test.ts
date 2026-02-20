@@ -1,4 +1,5 @@
 import Fastify, {FastifyInstance} from 'fastify';
+import { VampifyInstance } from "./vampify-literals.js";
 import { before, after, beforeEach } from 'node:test';
 import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
@@ -7,7 +8,7 @@ import path from 'node:path';
 
 
 export interface VampifyE2ESuite {
-  readonly fastify: FastifyInstance;
+  readonly fastify: VampifyInstance;
   runInTransaction(testBody: (fastify: FastifyInstance) => Promise<void>): Promise<void>;
 }
 
@@ -20,7 +21,7 @@ export interface VampifyE2ESuite {
  * 
  * @param vampifyApp The vampify plugin function.
  */
-async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
+async function vampifyBoot(vampifyApp: any): Promise<VampifyInstance>
 {
   // Read environment variables.
   dotenv.config({
@@ -78,7 +79,7 @@ async function vampifyBoot(vampifyApp: any): Promise<FastifyInstance>
  */
 export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
 {
-  let fastify : FastifyInstance;
+  let fastify : VampifyInstance;
   let stockDB : any = null;
   let testErr : any = null;
 
@@ -109,7 +110,7 @@ export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
   return {
 
     // Get the fastify instance.
-    get fastify(): FastifyInstance
+    get fastify(): VampifyInstance
     {
       if (!fastify)
       {
@@ -119,7 +120,7 @@ export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
     },
 
     // Test Wrapper (Wraps the test in a transaction).
-    async runInTransaction(testBody: (fastify: FastifyInstance) => Promise<void>)
+    async runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>)
     {
       // Save the real (stock) database object.
       stockDB = fastify.db;

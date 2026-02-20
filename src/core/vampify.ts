@@ -1,5 +1,9 @@
 import fp from 'fastify-plugin';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import {
+  FastifyInstance,
+  FastifyPluginOptions}
+  from 'fastify';
+
 import fastifySensible from "@fastify/sensible";
 import vampifyEnvPlugin from './plugins/environment.js';
 import vampifyDatabasePlugin from './plugins/database.js';

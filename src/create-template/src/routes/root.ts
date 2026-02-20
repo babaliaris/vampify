@@ -1,6 +1,7 @@
-import { FastifyPluginAsync, FastifyInstance, FastifyPluginOptions } from "fastify";
+import { FastifyPluginAsync } from "fastify";
+import {VampifyInstance} from "@vampify/literals";
 
-const root: FastifyPluginAsync = async (fastify: FastifyInstance, opts: FastifyPluginOptions): Promise<void>=>
+const root: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>=>
 {
     fastify.get("/", (req, res)=>
     {

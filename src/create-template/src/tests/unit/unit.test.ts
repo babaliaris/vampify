@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 
-test('General Unit Tests', () =>
+test('GPU Test', () =>
 {
   assert.strictEqual(50+30, 80);
   assert.strictEqual(2*10, 20);

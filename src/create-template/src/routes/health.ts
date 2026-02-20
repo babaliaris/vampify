@@ -1,7 +1,8 @@
 import { FastifyPluginAsync } from "fastify";
+import {VampifyInstance} from "@vampify/literals";
 import { sql } from "drizzle-orm";
 
-const root: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
+const root: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void> =>
 {
   fastify.get('/health', async (request, reply) =>
   {
