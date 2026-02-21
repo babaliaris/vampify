@@ -4,11 +4,35 @@ import fastifyCookie from "@fastify/cookie";
 import { VAMPIFY_LITERALS } from "../vampify-literals.js";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createHash } from "node:crypto";
+import bcrypt from 'bcrypt';
 
 
 export type VampifyAuthPayload = {
   user_id     : string,
   foot_print  : string
+};
+
+
+/**
+ * 
+ * @param password The word to be hashed.
+ * @returns The hashed string.
+ */
+export const vampifyHashCreate = async (password: string): Promise<string> =>
+{
+    return await bcrypt.hash(password, 12);
+};
+
+
+/**
+ * 
+ * @param password The word to be compared
+ * @param hash The hash to be compared
+ * @returns True on success, false otherwise.
+ */
+export const vampifyHashCompare = async (password: string, hash: string): Promise<boolean> =>
+{
+    return await bcrypt.compare(password, hash);
 };
 
 
@@ -151,6 +175,12 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
     },
   });
 
+  // Encrypted hash creation.
+  fastify.decorate('vampifyHashCreate', vampifyHashCreate);
+
+  // Compare hash against data.
+  fastify.decorate('vampifyHashCompare', vampifyHashCompare);
+
   // Register Cookie support.
   fastify.register(fastifyCookie);
 
@@ -173,9 +203,12 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
 });
 
 
+
+
 declare module 'fastify' {
 
-  interface FastifyInstance {
+  interface FastifyInstance
+  {
 
    /**
    * Authenticate.
@@ -189,9 +222,27 @@ declare module 'fastify' {
    * @param rep The FastifyReply object.
    */
     vampifyAuth(req: FastifyRequest, rep: FastifyReply): Promise<void>;
+
+    /**
+     * 
+     * @param password The word to be hashed.
+     * @returns The hashed string.
+     */
+    vampifyHashCreate(password: string): Promise<string>;
+
+
+    /**
+     * 
+     * @param password The word to be compared
+     * @param hash The hash to be compared
+     * @returns True on success, false otherwise.
+     */
+    vampifyHashCompare(password: string, hash: string): Promise<boolean>;
   }
 
-  interface FastifyRequest {
+
+  interface FastifyRequest
+  {
 
    /**
    * Create a Digital Footprint.
@@ -211,7 +262,9 @@ declare module 'fastify' {
     vampify_payload?: VampifyAuthPayload | null;
   }
 
-  interface FastifyReply {
+
+  interface FastifyReply
+  {
 
    /**
    * Sign The Payload.

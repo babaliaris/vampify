@@ -26,6 +26,7 @@
     "@fastify/sensible": "^6.0.4",
     "@fastify/type-provider-typebox": "^6.1.0",
     "@sinclair/typebox": "^0.34.48",
+    "bcrypt": "^6.0.0",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.4",
     "drizzle-orm": "^0.45.1",
@@ -35,6 +36,7 @@
     "pino-roll": "^4.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^25.2.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.1",

@@ -94,4 +94,16 @@ describe('Vampify Framework Tests', () =>
     assert.strictEqual(maliciousRes.statusCode, 401);
   });
 
+
+  test('should hash and compare password correctly', async()=>
+  {
+    const password = "this-is-a-password";
+  
+    const hash = await e2e_suite.fastify.vampifyHashCreate(password);
+
+    const success = await e2e_suite.fastify.vampifyHashCompare(password, hash);
+
+    assert.strictEqual(success, true);
+  });
+
 });
