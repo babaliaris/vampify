@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyPluginAsync } from 'fastify';
 import { VampifyInstance } from "./vampify-literals.js";
 import { before, after, beforeEach } from 'node:test';
 import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
@@ -21,7 +21,7 @@ export interface VampifyE2ESuite {
  * 
  * @param vampifyApp The vampify plugin function.
  */
-async function vampifyBoot(vampifyApp: any): Promise<VampifyInstance>
+async function vampifyBoot(vampifyApp: any, mock_routes?: FastifyPluginAsync): Promise<VampifyInstance>
 {
   // Read environment variables.
   dotenv.config({
@@ -42,11 +42,14 @@ async function vampifyBoot(vampifyApp: any): Promise<VampifyInstance>
       },
     } : false, // Disable logging.
 
-    forceCloseConnections: true
+    forceCloseConnections: false
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   // Register the main application logic (Entry Point).
   await fastify.register(vampifyApp);
+
+  // Register mock routes.
+  if (mock_routes) await fastify.register(mock_routes);
   
   // Wait for all plugins to load (important for Drizzle/Auth/etc.)
   await fastify.ready();
@@ -77,15 +80,14 @@ async function vampifyBoot(vampifyApp: any): Promise<VampifyInstance>
  * 
  * @returns An object that contains the runInTransaction() and fastify instance.
  */
-export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
+export function vampifySetupE2E(vampifyApp: any, mock_routes?: FastifyPluginAsync): VampifyE2ESuite
 {
   let fastify : VampifyInstance;
   let stockDB : any = null;
-  let testErr : any = null;
 
   before(async () =>
   {
-    fastify = await vampifyBoot(vampifyApp);
+    fastify = await vampifyBoot(vampifyApp, mock_routes);
   });
 
   after(async () =>
@@ -102,7 +104,6 @@ export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
     {
       fastify.db  = stockDB;
       stockDB     = null;
-      testErr     = null;
     }
   });
 
@@ -131,39 +132,27 @@ export function vampifySetupE2E(vampifyApp: any): VampifyE2ESuite
         {
           fastify.db  = tx; // The "Hot Swap".
 
-          try
-          {
-            await testBody(fastify);
-          }
-
-          catch(err: any)
-          {
-            testErr = err;
-            throw err;
-          }
-
-          finally
-          {
-            tx.rollback();
-          }
+          await testBody(fastify);
+          
+          // Force the transaction to rollback if testBody() does not throw an error.
+          throw Error("VampifyCleanRollback");
         });
       }
 
       catch (err: any)
       {
-        // Throw the captured test error if it exists.
-        if (testErr) throw testErr;
+        if (err.message === "VampifyCleanRollback") return;
 
-        // Drizzle uses a specific internal error for rollbacks.
-        // If its not a rollback error, re-throw the error.
-        if (err.message !== 'Rollback') throw err;
+        if (err.message === 'Rollback') return;
+
+        // If the error is not an intentianal rollback, re-throw it for the tests to fail!
+        throw err;
       }
 
       finally
       {
         fastify.db  = stockDB;
         stockDB     = null;
-        testErr     = null;
       }
     }
   };

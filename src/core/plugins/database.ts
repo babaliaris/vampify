@@ -17,14 +17,14 @@ const vampifyDatabasePlugin = fp(async (fastify: VampifyInstance, opt: DatabaseP
 {
   // Create the MYSQL connection pool.
   const pool = mysql.createPool({
-    host: fastify.getEnvs().DB_HOST,
-    user: fastify.getEnvs().DB_USER,
-    password: fastify.getEnvs().DB_PASS,
-    database: fastify.getEnvs().DB_NAME,
-    connectionLimit: fastify.getEnvs().DB_LIMIT,
-    debug: fastify.getEnvs().DB_DEBUG && fastify.vampifyIsDevMode(),
-    dateStrings: true,
-    bigNumberStrings: true
+    host              : fastify.getEnvs().DB_HOST,
+    user              : fastify.getEnvs().DB_USER,
+    password          : fastify.getEnvs().DB_PASS,
+    database          : fastify.getEnvs().DB_NAME,
+    connectionLimit   : fastify.getEnvs().DB_LIMIT,
+    debug             : fastify.getEnvs().DB_DEBUG && fastify.vampifyIsDevMode(),
+    dateStrings       : true,
+    bigNumberStrings  : true
   });
 
   // Initialize Drizzle
@@ -34,13 +34,16 @@ const vampifyDatabasePlugin = fp(async (fastify: VampifyInstance, opt: DatabaseP
   fastify.decorate("db", db as any);
 
   // Clean up on close.
-  fastify.addHook("onClose", async () => {
+  fastify.addHook("onClose", async (instance) =>
+  {
+    instance.log.info("Closing Database connection pool...");
     await pool.end();
   });
 
   // Check if the connection was enstablished on server startup.
   // Else, let the server crash.
-  fastify.addHook('onReady', async () => {
+  fastify.addHook('onReady', async () =>
+  {
     await db.execute(sql`SELECT 1`);
     fastify.log.info('Database connection verified!');
   });

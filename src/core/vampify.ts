@@ -1,8 +1,6 @@
 import fp from 'fastify-plugin';
-import {
-  FastifyInstance,
-  FastifyPluginOptions}
-  from 'fastify';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { vampifyInitializeErrorHandling } from './utilities/vampify-error-hanlder.js';
 
 import fastifySensible from "@fastify/sensible";
 import vampifyEnvPlugin from './plugins/environment.js';
@@ -17,6 +15,9 @@ export const vampifyPlugin = fp( async (fastify: FastifyInstance, opts: VampifyP
 {
   // Load Environment Variables.
   await fastify.register(vampifyEnvPlugin);
+
+  // Initialize the error handler.
+  vampifyInitializeErrorHandling(fastify);
 
   // Register Database.
   await fastify.register(vampifyDatabasePlugin, {schema: opts.schema});
