@@ -110,9 +110,13 @@ DB_DEBUG=false
 JWT_SECRET=just_a_secret_key
 JWT_EXPIRES=60
 AUTH_REDIRECT=/credentials-login
+
+#Can be: development OR production OR test
 RUN_MODE=development
-LOGGING=true
+
+#Can be: roll OR pretty OR stdout
 LOG_METHOD=pretty
+LOGGING=true
 ```
 
 ### 3. Production Environment
@@ -238,4 +242,3 @@ test('Should fail if the Digital Footprint is compromised', async () =>
   assert.strictEqual(maliciousRes.statusCode, 401);
 });
 ```
-

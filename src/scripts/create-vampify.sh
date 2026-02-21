@@ -90,7 +90,8 @@ const newPkg = {
     'db:test:migrate': 'cross-env NODE_ENV=test tsx src/db/migrate.ts'
   },
   dependencies: frameworkPkg.dependencies,
-  devDependencies: frameworkPkg.devDependencies
+  devDependencies: frameworkPkg.devDependencies,
+  overrides: frameworkPkg.overrides
 };
 fs.writeFileSync('package.json', JSON.stringify(newPkg, null, 2));
 "
