@@ -38,7 +38,7 @@ export function vampifyCreateFootprint(req: FastifyRequest): string
  * @param req The FastifyRequest object.
  * @param rep The FastifyReply object.
  */
-export async function vampifySignPayload(rep: FastifyReply, user_id: string): Promise<void>
+export async function vampifySignPayload(rep: FastifyReply, user_id: string, body?: any): Promise<void>
 {
   // Get the fastify server.
   const fastify: FastifyInstance = rep.server;
@@ -64,7 +64,7 @@ export async function vampifySignPayload(rep: FastifyReply, user_id: string): Pr
       sameSite: "strict",
       maxAge  : fastify.getEnvs().JWT_EXPIRES
     })
-    .send({ message: "Logged in" });
+    .send(body);
 }
 
 
@@ -165,8 +165,9 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
   });
 
   // Reply Decorator vampifySignPayload().
-  fastify.decorateReply("vampifySignPayload", function (this: FastifyReply, user_id: string) {
-    return vampifySignPayload(this, user_id);
+  fastify.decorateReply("vampifySignPayload", function (this: FastifyReply, user_id: string, body?: any)
+  {
+    return vampifySignPayload(this, user_id, body);
   });
 });
 
@@ -218,7 +219,7 @@ declare module 'fastify' {
    * 
    * @param user_id The user id that was logged in.
    */
-    vampifySignPayload(user_id: string): Promise<void>;
+    vampifySignPayload(user_id: string, body?: any): Promise<void>;
   }
 }
 
