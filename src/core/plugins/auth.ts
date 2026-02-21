@@ -2,7 +2,7 @@ import fp from "fastify-plugin";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
 import { VAMPIFY_LITERALS } from "../vampify-literals.js";
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply, FastifySchema } from "fastify";
 import { createHash } from "node:crypto";
 
 
@@ -38,7 +38,8 @@ export function vampifyCreateFootprint(req: FastifyRequest): string
  * @param req The FastifyRequest object.
  * @param rep The FastifyReply object.
  */
-export async function vampifySignPayload(rep: FastifyReply, user_id: string, body?: any): Promise<void>
+export async function vampifySignPayload<S extends FastifySchema = FastifySchema>
+(rep: FastifyReply<any, any, any, any, S>, user_id: string, body?: any): Promise<void>
 {
   // Get the fastify server.
   const fastify: FastifyInstance = rep.server;
