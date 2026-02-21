@@ -3,6 +3,13 @@ import tsParser from "@typescript-eslint/parser";
 
 export default [
   {
+    ignores: [
+      "external/vampify/**",
+      "dist/**",
+      "node_modules/**"
+    ]
+  },
+  {
     files: ["src/**/*.ts"], 
     languageOptions:
     {
