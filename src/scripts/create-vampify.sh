@@ -78,6 +78,7 @@ const newPkg = {
   version: '1.0.0',
   type: 'module',
   scripts: {
+    'lint': 'eslint .',
     'build': 'rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && mkdir -p dist/src/routes dist/src/plugins',
     'start': 'cross-env NODE_ENV=production node dist/src/server.js',
     'test:e2e': 'cross-env NODE_ENV=test node --test --import tsx \"src/tests/e2e/**/*.e2e.ts\"',

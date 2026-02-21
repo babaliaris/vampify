@@ -6,7 +6,7 @@ const credentials: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
 
     fastify.get("/credentials-login", async (req,res)=>
     {
-        res.vampifySignPayload(mocked_user.user_id);
+        await res.vampifySignPayload(mocked_user.user_id);
     });
 
 

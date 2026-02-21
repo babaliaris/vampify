@@ -53,7 +53,7 @@ async function vampifyServerStart()
 
 
 //START THE SERVER!!!
-vampifyServerStart();
+await vampifyServerStart();
 
 
 
