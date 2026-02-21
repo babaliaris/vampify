@@ -15,8 +15,8 @@
     "dev": "cross-env NODE_ENV=development tsx watch src/sandbox/server.ts",
     "db:migrate": "npm run db:generate && npm run db:dev:migrate && npm run db:test:migrate",
     "db:generate": "cross-env NODE_ENV=development drizzle-kit generate",
-    "db:dev:migrate": "cross-env NODE_ENV=development tsx src/db/migrate.ts",
-    "db:test:migrate": "cross-env NODE_ENV=test tsx src/sadnbox/db/migrate.ts"
+    "db:dev:migrate": "cross-env NODE_ENV=development tsx src/sandbox/db/migrate.ts",
+    "db:test:migrate": "cross-env NODE_ENV=test tsx src/sandbox/db/migrate.ts"
   },
   "dependencies": {
     "@fastify/autoload": "^6.3.1",
