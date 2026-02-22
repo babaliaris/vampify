@@ -3,6 +3,7 @@ import { VampifyInstance } from "./vampify-literals.js";
 import { before, after, beforeEach } from 'node:test';
 import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { sql } from "drizzle-orm";
 import dotenv from "dotenv";
 import path from 'node:path';
 
@@ -121,7 +122,7 @@ export function vampifySetupE2E(vampifyApp: any, mock_routes?: FastifyPluginAsyn
     },
 
     // Test Wrapper (Wraps the test in a transaction).
-    async runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>)
+    async runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>, fk_check: boolean = true)
     {
       // Save the real (stock) database object.
       stockDB = fastify.db;
@@ -132,7 +133,9 @@ export function vampifySetupE2E(vampifyApp: any, mock_routes?: FastifyPluginAsyn
         {
           fastify.db  = tx; // The "Hot Swap".
 
+          if (!fk_check) await tx.execute(sql`SET FOREIGN_KEY_CHECKS = 0;`)
           await testBody(fastify);
+          if (!fk_check) await tx.execute(sql`SET FOREIGN_KEY_CHECKS = 1;`)
           
           // Force the transaction to rollback if testBody() does not throw an error.
           throw Error("VampifyCleanRollback");
