@@ -38,7 +38,7 @@ VAMPIFY_DIR_NAME="external/vampify"
 
 # Setup Project Directory
 echo -e "${CYAN}🚀 Initializing project: ${BOLD}$PROJECT_NAME${NC}"
-mkdir -p "$PROJECT_NAME"
+mkdir "$PROJECT_NAME"
 
 # Change to the project directory and copy the path.
 cd "$PROJECT_NAME" || exit
