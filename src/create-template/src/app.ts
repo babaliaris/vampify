@@ -14,14 +14,17 @@ export const vampifyApp = fp( async (fastify: VampifyInstance, opts: FastifyPlug
 
   // Auto-load Plugins
   void fastify.register(AutoLoad, {
-    dir: join(import.meta.dirname, 'plugins'),
-    options: opts
+    dir     : join(import.meta.dirname, 'plugins'),
+    options : opts
   });
 
   // Auto-load Routes
   void fastify.register(AutoLoad, {
-    dir: join(import.meta.dirname, 'routes'),
-    options: opts
+    dir               : join(import.meta.dirname, 'routes'),
+    options           : opts,
+    routeParams       : false,
+    cascadeHooks      : true,
+    dirNameRoutePrefix: false
   });
 
 });
