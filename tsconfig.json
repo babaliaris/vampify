@@ -26,7 +26,8 @@
       "@vampify/env": ["./src/core/plugins/environment.ts"],
       "@vampify/auth": ["./src/core/plugins/auth.ts"],
       "@vampify/literals": ["./src/core/vampify-literals.ts"],
-      "@vampify/test": ["./src/core/vampify-test.ts"]
+      "@vampify/test": ["./src/core/vampify-test.ts"],
+      "@vampify/utils": ["./src/core/utilities/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],

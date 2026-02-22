@@ -1,7 +1,7 @@
 import Fastify, { FastifyPluginAsync } from 'fastify';
 import { VampifyInstance } from "./vampify-literals.js";
 import { before, after, beforeEach } from 'node:test';
-import { VAMPIFY_ENV_LITERALS } from './plugins/environment.js';
+import { vampifyGetLoggerConfig } from './utilities/vampify-logger-config.js';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { sql } from "drizzle-orm";
 import dotenv from "dotenv";
@@ -45,18 +45,9 @@ async function vampifyBoot(vampifyApp: any, mock_routes?: FastifyPluginAsync): P
 
   // Create the fastify instance.
   const fastify = Fastify(
-    {
-      logger: process.env.LOGGING === VAMPIFY_ENV_LITERALS.TRUE ? {
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-        },
-      },
-    } : false, // Disable logging.
-
-    forceCloseConnections: false
+  {
+    logger                : vampifyGetLoggerConfig(),
+    forceCloseConnections : false
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   // Register the main application logic (Entry Point).
