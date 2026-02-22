@@ -10,7 +10,20 @@ import path from 'node:path';
 
 export interface VampifyE2ESuite {
   readonly fastify: VampifyInstance;
-  runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>): Promise<void>;
+
+  /**
+   * Run a Test inside a rolled-back transaction.
+   * 
+   * This function will execute your test and insure that 
+   * the state of the database stays clean after finishing.
+   * It will also hot-swap the fastify.db instance with the
+   * actual transaction object, in order for your API routes
+   * to run in that transaction as well.
+   * 
+   * @param testBody The function that defines your test
+   * @param fk_check True by default. If false, then foreign key checks are disabled.
+   */
+  runInTransaction(testBody: (fastify: VampifyInstance) => Promise<void>, fk_check?: boolean): Promise<void>;
 }
 
 
