@@ -2,7 +2,7 @@ import fp from "fastify-plugin";
 import { FastifyInstance } from "fastify";
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
-import { VAMPIFY_LITERALS } from "@/core/vampify-literals.js";
+import { VAMPIFY_LITERALS } from "@vampify/literals";
 import { ROUTE_ENDPOINTS } from "../literals.js"
 
 const swaggerPlugin = fp(async (fastify: FastifyInstance)=>
