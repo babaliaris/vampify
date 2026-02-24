@@ -1,16 +1,21 @@
 import { FastifyPluginAsync } from "fastify";
+import { ROUTE_ENDPOINTS } from "../literals.js";
 
 const credentials: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
 {
     const mocked_user = {user_id: "1"};
 
-    fastify.get("/credentials-login", async (req,res)=>
+    fastify.get(ROUTE_ENDPOINTS.CREDENTIALS.ROOT, async (req,res)=>
     {
         await res.vampifySignPayload(mocked_user.user_id);
     });
 
 
-    fastify.get("/credentials-check-payload", {preHandler: [fastify.vampifyAuth]}, async (req,res)=>
+    fastify.get(ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
+    {
+        preHandler: [fastify.vampifyAuth]
+
+    }, async (req,res)=>
     {
         const payload = req.vampify_payload;
 

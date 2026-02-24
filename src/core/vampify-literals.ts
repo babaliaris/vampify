@@ -8,7 +8,8 @@ import {
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 
 export const VAMPIFY_LITERALS = {
-    PAYLOAD_COOKIE_NAME: "VAMPIFY_PAYLOAD_COOKIE"
+    PAYLOAD_COOKIE_NAME: "VAMPIFY_PAYLOAD_COOKIE",
+    NATIVE_API_KEY_NAME: "VAMPIFY_NATIVE_KEY"
 };
 
 export type VampifyInstance = FastifyInstance<

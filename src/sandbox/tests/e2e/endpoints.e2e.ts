@@ -1,18 +1,19 @@
 import { test, describe} from 'node:test';
 import assert from 'node:assert';
 import { vampifySetupE2E } from "@vampify/test";
-import {vampifyApp} from "@/sandbox/app.js";
+import {vampifyApp} from "../../app.js";
+import { ROUTE_ENDPOINTS } from '../../literals.js';
 
 describe('Vampify Framework Tests', () => 
 {
   const e2e_suite = vampifySetupE2E(vampifyApp);
 
-  test('GET /health', async () =>
+  test(`GET ${ROUTE_ENDPOINTS.HEALTH.ROOT}`, async () =>
   {
 
     const response = await e2e_suite.fastify.inject({
       method: 'GET',
-      url: '/health'
+      url   : ROUTE_ENDPOINTS.HEALTH.ROOT
     });
 
     assert.strictEqual(response.statusCode, 200);
@@ -42,9 +43,10 @@ describe('Vampify Framework Tests', () =>
   test('Should perform full Cookie + Footprint flow', async () =>
   {
     // Login to get the cookie
-    const loginRes = await e2e_suite.fastify.inject({
+    const loginRes = await e2e_suite.fastify.inject(
+    {
       method: 'GET',
-      url: '/credentials-login'
+      url   : ROUTE_ENDPOINTS.CREDENTIALS.ROOT
     });
 
     assert.strictEqual(loginRes.statusCode, 200);
@@ -56,9 +58,10 @@ describe('Vampify Framework Tests', () =>
 
     // Use the cookie to access the protected route
     const checkRes = await e2e_suite.fastify.inject({
-      method: 'GET',
-      url: '/credentials-check-payload',
-      headers: {
+      method  : 'GET',
+      url     : ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
+      headers :
+      {
         // We pass the cookie string back exactly as received
         cookie: Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader
       }
@@ -73,19 +76,21 @@ describe('Vampify Framework Tests', () =>
   test('Should fail if the Digital Footprint is compromised', async () =>
   {
     // 1. Login to get a valid cookie
-    const loginRes = await e2e_suite.fastify.inject({
-      method: 'GET',
-      url: '/credentials-login',
-      headers: { 'user-agent': 'VampireBrowser/1.0' }
+    const loginRes = await e2e_suite.fastify.inject(
+    {
+      method  : 'GET',
+      url     : ROUTE_ENDPOINTS.CREDENTIALS.ROOT,
+      headers : { 'user-agent': 'VampireBrowser/1.0' }
     });
 
     const cookie = loginRes.headers['set-cookie'];
 
     // 2. Attempt to use that cookie from a DIFFERENT User-Agent
     const maliciousRes = await e2e_suite.fastify.inject({
-      method: 'GET',
-      url: '/credentials-check-payload',
-      headers: {
+      method  : 'GET',
+      url     : ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
+      headers :
+      {
         cookie: Array.isArray(cookie) ? cookie[0] : cookie,
         'user-agent': 'HackerBrowser/2.0' // Footprint mismatch!
       }

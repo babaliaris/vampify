@@ -1,10 +1,11 @@
 import { FastifyPluginAsync } from "fastify";
 import {VampifyInstance} from "@vampify/literals";
 import { sql } from "drizzle-orm";
+import { ROUTE_ENDPOINTS } from  "../literals.js"
 
 const root: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void> =>
 {
-  fastify.get('/health', async (request, reply) =>
+  fastify.get(ROUTE_ENDPOINTS.HEALTH.ROOT, async (request, reply) =>
   {
     let dbStatus = 'failed';
 
