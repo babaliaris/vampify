@@ -57,11 +57,12 @@ export function vampifyGetLoggerConfig(): any
   // ROTATING FILES
   else if (process.env.LOG_METHOD === VAMPIFY_ENV_LITERALS.LOG_METHOD_ROLL)
   {
+    const folder_name = process.env.NODE_ENV === "production" ? 'logs' : 'logs-dev';
     transport =
     {
       target      : 'pino-roll',
       options     : {
-        file      : path.join(process.cwd(), 'logs', 'vampify-app.log'),
+        file      : path.join(process.cwd(), folder_name, 'vampify-app.log'),
         frequency : 'daily',
         dateFormat: 'yyyy-MM-dd',
         size      : '10m',
