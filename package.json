@@ -52,6 +52,6 @@
   "overrides": {
     "bn.js": "5.2.3",
     "esbuild": "0.25.0",
-    "minimatch": "10.2.1"
+    "minimatch": "10.2.3"
   }
 }

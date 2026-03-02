@@ -85,8 +85,8 @@ export async function vampifySignPayload
     .setCookie(VAMPIFY_LITERALS.PAYLOAD_COOKIE_NAME, token, {
       path    : "/", // This insures the browser sends the cookie to every endpoint!
       httpOnly: true,
-      secure  : fastify.vampifyIsProdMode(),
-      sameSite: "strict",
+      secure  : true, // Https is required!!!
+      sameSite: fastify.vampifyIsProdMode() ? "strict" : "none", // None, requires HTTPS!!!
       maxAge  : fastify.getEnvs().JWT_EXPIRES
     })
     .send(body);
