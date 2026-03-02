@@ -7,15 +7,18 @@ import dotenv from "dotenv";
 
 
 // Load environment variables.
-dotenv.config({
+dotenv.config(
+{
   path  : `${process.cwd()}/.env.${process.env.NODE_ENV}`,
   debug : process.env.NODE_ENV === VAMPIFY_ENV_LITERALS.RUN_MODE_DEV
 });
 
 
 // Create the fastify instance.
-const server = Fastify({
-  logger: vampifyGetLoggerConfig()
+const server = Fastify(
+{
+  logger    : vampifyGetLoggerConfig(),
+  trustProxy: true
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 

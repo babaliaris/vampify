@@ -82,12 +82,14 @@ export async function vampifySignPayload
 
   //Reply back and store it in HttpOnly cookie (CORS Disabled!!!)
   rep
-    .setCookie(VAMPIFY_LITERALS.PAYLOAD_COOKIE_NAME, token, {
-      path    : "/", // This insures the browser sends the cookie to every endpoint!
-      httpOnly: true,
-      secure  : true, // Https is required!!!
-      sameSite: fastify.vampifyIsProdMode() ? "strict" : "none", // None, requires HTTPS!!!
-      maxAge  : fastify.getEnvs().JWT_EXPIRES
+    .setCookie(VAMPIFY_LITERALS.PAYLOAD_COOKIE_NAME, token,
+    {
+      path        : "/", // This insures the browser sends the cookie to every endpoint!
+      httpOnly    : true,
+      secure      : true, // Https is required!!!
+      partitioned : true,
+      sameSite    : "none", // None, requires HTTPS!!!
+      maxAge      : fastify.getEnvs().JWT_EXPIRES
     })
     .send(body);
 }
