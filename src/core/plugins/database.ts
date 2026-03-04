@@ -24,7 +24,10 @@ const vampifyDatabasePlugin = fp(async (fastify: VampifyInstance, opt: DatabaseP
     connectionLimit   : fastify.getEnvs().DB_LIMIT,
     debug             : fastify.getEnvs().DB_DEBUG && fastify.vampifyIsDevMode(),
     dateStrings       : true,
-    bigNumberStrings  : true
+    bigNumberStrings  : true,
+    waitForConnections: true,    // If all 10 pipes are busy, wait for one to open
+    queueLimit        : 0,       // 0 means no limit to the queue (safer for spikes)
+    idleTimeout       : 60000,   // Close idle connections after 60 seconds
   });
 
   // Initialize Drizzle
