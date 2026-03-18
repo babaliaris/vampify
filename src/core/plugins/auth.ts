@@ -46,10 +46,17 @@ export const vampifyHashCompare = async (password: string, hash: string): Promis
  * @param req The FastifyRequest object.
  * @returns The footprint hash that was created
  */
-export function vampifyCreateFootprint(req: FastifyRequest): string
+export function vampifyCreateFootprint(req: FastifyRequest, device_id?: string): string
 {
-    const raw: string = `${req.ip}-${req.headers["user-agent"]}`;
-    return createHash("sha256").update(raw).digest("hex");
+  // Get user agent for browsers, uknown otherwise.
+  const userAgent = req.headers["user-agent"] || "unknown-ua";
+
+  // If a deviceId is provided (from the mobile login), we use that instead of the IP address.
+  const identifier = device_id ? device_id : req.ip;
+
+  // Create the string and returned a hashed version of it.
+  const raw: string = `${identifier}-${userAgent}`;
+  return createHash("sha256").update(raw).digest("hex");
 }
 
 
@@ -63,7 +70,7 @@ export function vampifyCreateFootprint(req: FastifyRequest): string
  * @param rep The FastifyReply object.
  */
 export async function vampifySignPayload
-(rep: FastifyReply, user_id: string, body?: any): Promise<void>
+(rep: FastifyReply, user_id: string, body?: any, device_id?: string): Promise<string | void>
 {
   // Get the fastify server.
   const fastify: FastifyInstance = rep.server;
@@ -71,7 +78,7 @@ export async function vampifySignPayload
   // Create the payload object.
   const payload: VampifyAuthPayload = {
     user_id     : user_id,
-    foot_print  : vampifyCreateFootprint(rep.request)
+    foot_print  : vampifyCreateFootprint(rep.request, device_id)
   };
 
   // Sign the payload.
@@ -80,8 +87,16 @@ export async function vampifySignPayload
     }
   );
 
-  //Reply back and store it in HttpOnly cookie (CORS Disabled!!!)
-  rep
+  // For native apps (mobile), send the
+  // token in the json response.
+  if (device_id) return rep.send(
+  {
+    token : token,
+    body  : body
+  });
+
+  //For browsers, send the token in an HTTP Only Cookie.
+  return rep
     .setCookie(VAMPIFY_LITERALS.PAYLOAD_COOKIE_NAME, token,
     {
       path        : "/", // This insures the browser sends the cookie to every endpoint!
@@ -91,7 +106,11 @@ export async function vampifySignPayload
       sameSite    : "none", // None, requires HTTPS!!!
       maxAge      : fastify.getEnvs().JWT_EXPIRES
     })
-    .send(body);
+    .send(
+    {
+      token : null,
+      body  : body
+    });
 }
 
 
@@ -109,58 +128,31 @@ export async function vampifyAuthenticate(req: FastifyRequest, res: FastifyReply
 {
   const fastify: FastifyInstance = req.server;
 
-  const nativeApiKey = req.headers["x-vampify-native-key"];
-
-  // Native App (Private Key)
-  if (typeof nativeApiKey === "string" && nativeApiKey)
+  // Try to verify the JWT payload and the digital footprint.
+  try
   {
-    // Placeholder logic: Currently blocks access until DB check is implemented
-    // Change this once you have your DB lookup ready.
-    const isKeyValid = false; // TODO: Implement DB check
+    // JWT is smart enough to know if the token is in a Bearer header or in an HTTP only cookie.
+    let payload: VampifyAuthPayload = await req.jwtVerify();
 
-    // Check the API key.
-    if (!isKeyValid)
+    // Verify Footprint
+    const device_id = req.headers[VAMPIFY_LITERALS.X_NATIVE_DEVICE_ID]; // Get the device ID it it exists.
+    if ( payload.foot_print !== vampifyCreateFootprint(req, typeof device_id === "string" ? device_id : undefined) )
     {
-      req.log.error("vampifyAuthenticate() failed due to invalid x-vampify-native-key");
-      return res.unauthorized(fastify.vampifyIsDevMode() ? "x-vampify-native-key verification failed." : "Unauthorized");
+      req.log.error("vampifyAuthenticate() failed due to failure in digital footprint validation.");
+
+      return res.unauthorized(fastify.vampifyIsDevMode() ? "Footprint verification failed" : "Unauthorized");
     }
+
+    //Assign the payload to the request object.
+    req.vampify_payload = payload;
   }
 
-  // Browser
-  else
+  // Authentication failed due to JWT verification.
+  catch (err)
   {
-    // Try to verify the JWT payload and the digital footprint.
-    try
-    {
-      // Extract from cookie automatically via @fastify/jwt
-      const payload: VampifyAuthPayload = await req.jwtVerify();
+    req.log.error(`vampifyAuthenticate() failed: ${err instanceof Error ? err.message : 'JTW verification failed.'}`);
 
-      // Verify Footprint
-      if ( payload.foot_print !== vampifyCreateFootprint(req) )
-      {
-        req.log.error("vampifyAuthenticate() failed due to failure in digital footprint validation.");
-
-        // We do not redirect here, because if the footprint breaks then its an XSS ATTACK!!!
-        return res.unauthorized(fastify.vampifyIsDevMode() ? "Footprint verification failed" : "Unauthorized");
-      }
-
-      //Assign the payload to the request object.
-      req.vampify_payload = payload;
-    }
-    
-    // Authentication failed due to JWT verification.
-    catch (err)
-    {
-      req.log.error(`vampifyAuthenticate() failed: ${err instanceof Error ? err.message : 'JTW verification failed.'}`);
-
-      // If it's a GET request send them to login.
-      if (req.method === 'GET')
-      {
-        return res.redirect(fastify.getEnvs().AUTH_REDIRECT);
-      }
-
-      return res.unauthorized(fastify.vampifyIsDevMode() ? "JTW Payload verification failed or expired" : "Unauthorized");
-    }
+    return res.unauthorized(fastify.vampifyIsDevMode() ? "JTW Payload verification failed or expired" : "Unauthorized");
   }
 }
 
@@ -198,9 +190,9 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
   });
 
   // Reply Decorator vampifySignPayload().
-  fastify.decorateReply("vampifySignPayload", function (this: FastifyReply, user_id: string, body?: any)
+  fastify.decorateReply("vampifySignPayload", function (this: FastifyReply, user_id: string, body?: any, device_id?: string)
   {
-    return vampifySignPayload(this, user_id, body);
+    return vampifySignPayload(this, user_id, body, device_id);
   });
 });
 
@@ -275,7 +267,7 @@ declare module 'fastify' {
    * 
    * @param user_id The user id that was logged in.
    */
-    vampifySignPayload(user_id: string, body?: any): Promise<void>;
+    vampifySignPayload(user_id: string, body?: any, device_id?: string): Promise<string | void>;
   }
 }
 

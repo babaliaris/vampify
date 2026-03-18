@@ -17,7 +17,6 @@ export const VampifyEnvSchema = Type.Object(
   JWT_SECRET: Type.String(),
   JWT_EXPIRES: Type.Integer(),
 
-  AUTH_REDIRECT: Type.String(),
   RUN_MODE: Type.String(),
   LOGGING: Type.Boolean(),
   LOG_METHOD: Type.String(),

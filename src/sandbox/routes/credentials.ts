@@ -1,16 +1,25 @@
 import { FastifyPluginAsync } from "fastify";
 import { ROUTE_ENDPOINTS } from "../literals.js";
+import { VAMPIFY_LITERALS } from "@vampify/literals";
 
 const credentials: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
 {
     const mocked_user = {user_id: "1"};
 
+    // Endpoint that returns a testing payload.
     fastify.get(ROUTE_ENDPOINTS.CREDENTIALS.ROOT, async (req,res)=>
     {
-        await res.vampifySignPayload(mocked_user.user_id);
+        // Take the x-native-devide-id header.
+        const header = req.headers[VAMPIFY_LITERALS.X_NATIVE_DEVICE_ID];
+
+        // Get the device id value.
+        const device_id: string | undefined = Array.isArray(header) ? header[0] : header;
+
+        await res.vampifySignPayload(mocked_user.user_id, null, device_id);
     });
 
 
+    // Endpoint that tests the payload.
     fastify.get(ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
     {
         preHandler: [fastify.vampifyAuth]

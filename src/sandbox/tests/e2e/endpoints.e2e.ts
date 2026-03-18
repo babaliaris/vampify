@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { vampifySetupE2E } from "@vampify/test";
 import {vampifyApp} from "../../app.js";
 import { ROUTE_ENDPOINTS } from '../../literals.js';
+import { VAMPIFY_LITERALS } from '@vampify/literals';
 
 describe('Vampify Framework Tests', () => 
 {
@@ -109,6 +110,61 @@ describe('Vampify Framework Tests', () =>
     const success = await e2e_suite.fastify.vampifyHashCompare(password, hash);
 
     assert.strictEqual(success, true);
+  });
+
+
+
+
+  test('Should perform full Native (Smartphone) Header + DeviceID flow', async () =>
+  {
+    const mockDeviceId  = 'iphone-15-pro-uuid-123';
+
+    // Login with a Device ID to get the Token in the JSON body
+    const loginRes = await e2e_suite.fastify.inject(
+    {
+      method  : 'GET',
+      url     : ROUTE_ENDPOINTS.CREDENTIALS.ROOT,
+      headers :
+      {
+        [VAMPIFY_LITERALS.X_NATIVE_DEVICE_ID]: mockDeviceId
+      }
+    });
+    assert.strictEqual(loginRes.statusCode, 200);
+    
+    // Check the body.
+    const body = JSON.parse(loginRes.payload);
+    assert.ok(body.token, 'Response body should contain a JWT token');
+    
+    // Ensure no cookie was set.
+    assert.strictEqual(loginRes.headers['set-cookie'], undefined);
+
+    // Access protected route using Authorization Header + Device ID Header
+    const checkRes = await e2e_suite.fastify.inject(
+    {
+      method  : 'GET',
+      url     : ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
+      headers :
+      {
+        'authorization': `Bearer ${body.token}`,
+        [VAMPIFY_LITERALS.X_NATIVE_DEVICE_ID]: mockDeviceId
+      }
+    });
+
+    assert.strictEqual(checkRes.statusCode, 200);
+    assert.strictEqual(checkRes.payload, "Payload checked successfully!");
+
+    // Fail if the Device ID is missing (Footprint mismatch)
+    const failRes = await e2e_suite.fastify.inject({
+      method: 'GET',
+      url: ROUTE_ENDPOINTS.CREDENTIALS.CHECK_PAYLOAD,
+      headers:
+      {
+        'authorization': `Bearer ${body.token}`,
+        // Missing X_NATIVE_DEVICE_ID!
+      }
+    });
+
+    assert.strictEqual(failRes.statusCode, 401);
   });
 
 });
