@@ -109,7 +109,6 @@ DB_DEBUG=false
 # Authentication & Logging
 JWT_SECRET=just_a_secret_key
 JWT_EXPIRES=60
-AUTH_REDIRECT=/credentials-login
 
 #Can be: development OR production OR test
 RUN_MODE=development
