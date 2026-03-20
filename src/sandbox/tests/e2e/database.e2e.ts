@@ -4,12 +4,29 @@ import { VampifyInstance } from "@/core/vampify-literals.js";
 import { vampifySetupE2E } from "@vampify/test";
 import {vampifyApp} from "@/sandbox/app.js";
 
-import { eq } from 'drizzle-orm';
+import { eq, Table} from 'drizzle-orm';
+import * as schema from "../../db/schema.js";
 import {usersTable} from "../../db/schema.js";
 
 describe('Database Tests', () =>
 {
   const e2e_suite = vampifySetupE2E(vampifyApp);
+
+  test('table should exist', async () =>
+  {
+    await e2e_suite.runInTransaction(async (fastify)=>
+    {
+      const tables = Object.values(schema).filter((entry) => entry instanceof Table);
+
+      for (let table of tables)
+      {
+        const select_result = await fastify.db.select().from(table).limit(1);
+        assert(select_result.length === 0);
+      }
+    });
+  });
+
+
 
   test('Test Transaction Insert', async () =>
   {
