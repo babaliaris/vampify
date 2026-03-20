@@ -30,13 +30,23 @@ const swaggerPlugin = fp(async (fastify: FastifyInstance)=>
                         name        : VAMPIFY_LITERALS.PAYLOAD_COOKIE_NAME,
                         description : 'JWT session stored in an HttpOnly cookie'
                     },
-                    // Native Apps (API Key in Header)
-                    apiKeyAuth:
+                    
+                    // Native Apps (Device Identification)
+                    NativeDeviceID:
                     {
-                        type        : 'apiKey',
-                        in          : 'header',
-                        name        : VAMPIFY_LITERALS.NATIVE_API_KEY_NAME,
-                        description : 'API Key for native/mobile application access'
+                        type: 'apiKey',
+                        in: 'header',
+                        name: VAMPIFY_LITERALS.X_NATIVE_DEVICE_ID,
+                        description: 'Enter a unique Device ID to simulate a mobile request. This tells the server to return the JWT in the JSON body instead of a Cookie.'
+                    },
+
+                    // Bearer Token for subsequent authenticated requests
+                    BearerAuth:
+                    {
+                        type: 'http',
+                        scheme: 'bearer',
+                        bearerFormat: 'JWT',
+                        description: "After log in, send the token in a classic Bearer header to authenticate the logged in user."
                     }
                 }
             }
