@@ -75,9 +75,9 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
       return reply.status(400).send(
       {
         statusCode: 400,
-        error: 'Bad Request',
-        message: 'The data provided is invalid.',
-        details: error.validation,
+        error     : 'Bad Request',
+        message   : 'The data provided is invalid.',
+        details   : error.validation,
       });
     }
 
@@ -91,36 +91,40 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
       switch (dbError.code)
       {
         case 'ER_DUP_ENTRY':
-          return reply.status(409).send({
+          return reply.status(409).send(
+          {
             statusCode: 409,
-            error: 'Conflict',
-            message: 'This record already exists.',
-            detail: fastify.vampifyIsDevMode() ? error.message : undefined
+            error     : 'Conflict',
+            message   : 'This record already exists.',
+            details   : fastify.vampifyIsDevMode() ? error.message : ""
           });
 
         case 'ER_NO_REFERENCED_ROW_2':
         case 'ER_NO_REFERENCED_ROW':
-          return reply.status(400).send({
+          return reply.status(400).send(
+          {
             statusCode: 400,
-            error: 'Bad Request',
-            message: 'Related record not found.',
-            detail: fastify.vampifyIsDevMode() ? error.message : undefined
+            error     : 'Bad Request',
+            message   : 'Related record not found.',
+            details   : fastify.vampifyIsDevMode() ? error.message : ""
           });
 
         case 'ER_DATA_TOO_LONG':
-          return reply.status(400).send({
+          return reply.status(400).send(
+          {
             statusCode: 400,
-            error: 'Bad Request',
-            message: 'Value is too long for the database field.',
-            detail: fastify.vampifyIsDevMode() ? error.message : undefined
+            error     : 'Bad Request',
+            message   : 'Value is too long for the database field.',
+            details   : fastify.vampifyIsDevMode() ? error.message : ""
           });
 
         case 'ER_WARN_DATA_OUT_OF_RANGE':
-          return reply.status(400).send({
+          return reply.status(400).send(
+          {
             statusCode: 400,
-            error: 'Bad Request',
-            message: 'Numeric value is out of range.',
-            detail: fastify.vampifyIsDevMode() ? error.message : undefined
+            error     : 'Bad Request',
+            message   : 'Numeric value is out of range.',
+            details   : fastify.vampifyIsDevMode() ? error.message : ""
           });
       }
     }
@@ -129,10 +133,12 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
     // These already have a statusCode attached from @fastify/sensible.
     if (error.statusCode && error.statusCode < 500)
     {
-      return reply.status(error.statusCode).send({
+      return reply.status(error.statusCode).send(
+      {
         statusCode: error.statusCode,
-        error: error.name,
-        message: error.message
+        error     : error.name,
+        message   : error.message,
+        details   : (error as any).details || undefined
       });
     }
 
@@ -140,11 +146,12 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
 
     fastify.log.error(error);
 
-    return reply.status(500).send({
+    return reply.status(500).send(
+    {
       statusCode: 500,
-      error: 'Internal Server Error',
-      message: fastify.vampifyIsDevMode() ? error.message : 'An unexpected error occurred.',
-      stack: fastify.vampifyIsDevMode() ? error.stack : undefined
+      error     : 'Internal Server Error',
+      message   : fastify.vampifyIsDevMode() ? error.message  : 'An unexpected error occurred.',
+      stack     : fastify.vampifyIsDevMode() ? error.stack    : {}
     });
   });
 }
