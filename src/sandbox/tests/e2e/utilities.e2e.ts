@@ -34,8 +34,8 @@ describe('Utilities Tests', () =>
             });
 
             // Get the response object and check the call.
-            const body = JSON.parse(response.body);
             assert.strictEqual(response.statusCode, status);
+            const body = JSON.parse(response.body);
 
             // Get the response status message.
             const expectedMsg = e2e_suite.fastify.vampifyIsProdMode()

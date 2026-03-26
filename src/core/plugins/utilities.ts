@@ -20,11 +20,14 @@ const STATUS_TO_REASON: Record<number, keyof typeof VAMPIFY_DEBUG_MSG.REASON> =
 
 
 
-function abortEndpoint(fastify: FastifyInstance, status: number, debugMsg: string, payload?: any): never
+function abortEndpoint(fastify: FastifyInstance, condition: any, status: number, debugMsg: string, payload?: any): void
 {
     // Make sure, that in production mode the debug msg IS NOT LEAKED!
     const reason    = STATUS_TO_REASON[status] || VAMPIFY_DEBUG_MSG.REASON.INTERNAL_SERVER_ERROR;
     const finalMsg  = fastify.vampifyIsProdMode() ? reason : debugMsg;
+
+    // If condition is true, return.
+    if (condition) return;
 
     // Error.
     if (status >= 500)
@@ -59,9 +62,9 @@ function abortEndpoint(fastify: FastifyInstance, status: number, debugMsg: strin
 const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 {
     // Decorate abortEndpoint().
-    fastify.decorate('vampifyAbortEndpoint', (status: number, debug_msg: string, payload?: any): never=>
+    fastify.decorate('vampifyAbort', function (condition: any, status: number, debug_msg: string, payload?: any): void
     {
-        abortEndpoint(fastify, status, debug_msg, payload);
+        abortEndpoint(fastify, condition, status, debug_msg, payload);
     });
 });
 
@@ -79,11 +82,14 @@ declare module 'fastify' {
      * & the payload BUT it GUARANTEES in production mode, that debug_msg
      * will not LEAK! Otherwise, the debug_msg will be used for the response as well.
      * 
+     * It works like an ASSERTION !
+     * 
+     * @param condition If falsey, the enpoint is aborted (The error is thrown)!
      * @param status The HTTP error code you want to throw.
      * @param debug_msg The debug message for the response & the internal logging.
      * @param payload A payload object for the internal logging.
      */
-    vampifyAbortEndpoint(status: number, debug_msg: string, payload?: any): never;
+    vampifyAbort<T>(condition: T | null | undefined | false, status: number, debug_msg: string, payload?: any): asserts condition;
   }
 }
 
