@@ -70,7 +70,7 @@ export function vampifyCreateFootprint(req: FastifyRequest, device_id?: string):
  * @param rep The FastifyReply object.
  */
 export async function vampifySignPayload
-(rep: FastifyReply, user_id: string, body?: any, device_id?: string): Promise<string | void>
+(rep: FastifyReply, user_id: string, body?: any, device_id?: string): Promise<FastifyReply>
 {
   // Get the fastify server.
   const fastify: FastifyInstance = rep.server;
@@ -266,8 +266,10 @@ declare module 'fastify' {
    * This function signs the payload.
    * 
    * @param user_id The user id that was logged in.
+   * 
+   * @returns The fastify reply object.
    */
-    vampifySignPayload(user_id: string, body?: any, device_id?: string): Promise<string | void>;
+    vampifySignPayload(user_id: string, body?: any, device_id?: string): Promise<FastifyReply>;
   }
 }
 
