@@ -19,18 +19,11 @@ export const ROUTE_ENDPOINTS =
     SWAGGER:
     {
         ROOT: "/docs"
-    }
-} as const;
+    },
 
-
-
-export const DEBUG_MSG =
-{
-    REASON:
+    UTILITIES:
     {
-        INTERNAL_SERVER_ERROR   : "INTERNAL_SERVER_ERROR",
-        ANAUTHORIZED            : "ANAUTHORIZED",
-        UNVERIFIED_USER         : "UNVERIFIED_USER",
-        NOT_FOUND               : "NOT_FOUND"
+        ROOT            : "/utilities",
+        ABORT_ENDPOINT  : "/utilities/abort-end-point"
     }
 } as const;

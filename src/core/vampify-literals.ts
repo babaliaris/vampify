@@ -11,7 +11,7 @@ import { Type } from "@sinclair/typebox";
 export const VAMPIFY_LITERALS = {
     PAYLOAD_COOKIE_NAME : "VAMPIFY_PAYLOAD_COOKIE",
     X_NATIVE_DEVICE_ID  : "x-vampify-device-id"
-};
+} as const;
 
 export type VampifyInstance = FastifyInstance<
   RawServerDefault,
@@ -20,6 +20,36 @@ export type VampifyInstance = FastifyInstance<
   FastifyBaseLogger,
   TypeBoxTypeProvider
 >;
+
+
+
+export const VAMPIFY_DEBUG_MSG =
+{
+    REASON:
+    {
+        // Success (status < 400)
+        SUCCESS                 : "SUCCESS", //200
+        CONTENT_CREATED         : "CONTENT_CREATED", //201
+        NO_CONTENT              : "NO_CONTENT", //204
+
+        // Warnings (status >= 400)
+        BAD_REQUEST             : "BAD_REQUEST", //400
+        UNAUTHORIZED            : "UNAUTHORIZED", //401
+        FORBIDDEN               : "FORBIDDEN", //403
+        NOT_FOUND               : "NOT_FOUND", //404
+        CONFLICT                : "CONFLICT", //409
+        PAYLOAD_TOO_LARGE       : "PAYLOAD_TOO_LARGE", //413
+        VALIDATION_FAILED       : "VALIDATION_FAILED", //422
+        TOO_MANY_REQUESTS       : "TOO_MANY_REQUESTS", //429
+
+        // Errors (status >= 500)
+        INTERNAL_SERVER_ERROR   : "INTERNAL_SERVER_ERROR", //500
+        SERVICE_UNAVAILABLE     : "SERVICE_UNAVAILABLE", //503
+
+        // Other
+        UNVERIFIED_USER         : "UNVERIFIED_USER"
+    }
+} as const;
 
 
 
@@ -111,4 +141,4 @@ export const VampifyStandardResponseErrors =
   {
     description: 'Unexpected server error'
   })
-};
+} as const;

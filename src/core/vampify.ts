@@ -6,6 +6,7 @@ import fastifySensible from "@fastify/sensible";
 import vampifyEnvPlugin from './plugins/environment.js';
 import vampifyDatabasePlugin from './plugins/database.js';
 import vampifyAuthenticationPlugin from './plugins/auth.js';
+import vampifyUtilitiesPlugin from './plugins/utilities.js';
 
 export type VampifyPluginOptions = {
   schema: Record<string, unknown>
@@ -28,4 +29,6 @@ export const vampifyPlugin = fp( async (fastify: FastifyInstance, opts: VampifyP
   // Register authentication plugin.
   await fastify.register(vampifyAuthenticationPlugin);
 
+  // Register utiities plugin.
+  await fastify.register(vampifyUtilitiesPlugin);
 });
