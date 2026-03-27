@@ -7,9 +7,11 @@ import { createHash } from "node:crypto";
 import bcrypt from 'bcrypt';
 
 
-export type VampifyAuthPayload = {
+export type VampifyAuthPayload<T = any> =
+{
   user_id     : string,
-  foot_print  : string
+  foot_print  : string,
+  data       ?: T
 };
 
 
@@ -63,33 +65,47 @@ export function vampifyCreateFootprint(req: FastifyRequest, device_id?: string):
 /**
  * Sign The Payload.
  * 
- * This function signs the payload.
+ * This function signs the payload. If device_id is
+ * provided, then we return the JTW token in the body
+ * property of the reply, otherwise as an HttpOnly cookie.
  * 
- * @param user_id The user id that was logged in.
- * @param req The FastifyRequest object.
  * @param rep The FastifyReply object.
+ * @param user_id The user id that was logged in.
+ * @param body A custom payload to be returned in the response.
+ * @param options An options object with extra config properties.
+ * 
+ * @returns The fastify reply object.
  */
-export async function vampifySignPayload
-(rep: FastifyReply, user_id: string, body?: any, device_id?: string): Promise<FastifyReply>
+export async function vampifySignPayload<T = any>(
+  rep     : FastifyReply, user_id: string, body?: any,
+  options?:
+  {
+    device_id ?: string,
+    expires   ?: number,
+    jwt_data  ?: T
+  }
+): Promise<FastifyReply>
 {
   // Get the fastify server.
   const fastify: FastifyInstance = rep.server;
 
   // Create the payload object.
-  const payload: VampifyAuthPayload = {
+  const payload: VampifyAuthPayload<T> =
+  {
     user_id     : user_id,
-    foot_print  : vampifyCreateFootprint(rep.request, device_id)
+    foot_print  : vampifyCreateFootprint(rep.request, options?.device_id),
+    data        : options?.jwt_data
   };
 
   // Sign the payload.
-  const token: string = await rep.jwtSign(payload, {
-      sign: {expiresIn: fastify.getEnvs().JWT_EXPIRES}
-    }
-  );
+  const token: string = await rep.jwtSign(payload,
+  {
+      sign: { expiresIn: options?.expires || fastify.getEnvs().JWT_EXPIRES }
+  });
 
   // For native apps (mobile), send the
   // token in the json response.
-  if (device_id) return rep.send(
+  if (options?.device_id) return rep.send(
   {
     token : token,
     body  : body
@@ -104,7 +120,7 @@ export async function vampifySignPayload
       secure      : true, // Https is required!!!
       partitioned : true,
       sameSite    : "none", // None, requires HTTPS!!!
-      maxAge      : fastify.getEnvs().JWT_EXPIRES
+      maxAge      : options?.expires || fastify.getEnvs().JWT_EXPIRES
     })
     .send(
     {
@@ -190,9 +206,10 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
   });
 
   // Reply Decorator vampifySignPayload().
-  fastify.decorateReply("vampifySignPayload", function (this: FastifyReply, user_id: string, body?: any, device_id?: string)
+  fastify.decorateReply("vampifySignPayload", function (
+    this: FastifyReply, user_id: string, body?: any, options?: any)
   {
-    return vampifySignPayload(this, user_id, body, device_id);
+    return vampifySignPayload(this, user_id, body, options);
   });
 });
 
@@ -262,14 +279,23 @@ declare module 'fastify' {
 
    /**
    * Sign The Payload.
-   * 
-   * This function signs the payload.
+   *
+   * This function signs the payload. If device_id is
+   * provided, then we return the JTW token in the body
+   * property of the reply, otherwise as an HttpOnly cookie.
    * 
    * @param user_id The user id that was logged in.
+   * @param body A custom payload to be returned in the response.
+   * @param options An options object with more config properties.
    * 
    * @returns The fastify reply object.
    */
-    vampifySignPayload(user_id: string, body?: any, device_id?: string): Promise<FastifyReply>;
+    vampifySignPayload<T = any>(user_id: string, body?: any, options?:
+    {
+      device_id ?: string,
+      expires   ?: number,
+      jwt_data  ?: T
+    }): Promise<FastifyReply>;
   }
 }
 

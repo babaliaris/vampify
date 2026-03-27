@@ -13,7 +13,8 @@ export const ROUTE_ENDPOINTS =
     CREDENTIALS:
     {
         ROOT            : "/credentials-login",
-        CHECK_PAYLOAD   : "/credentials-check-payload"
+        CHECK_PAYLOAD   : "/credentials-check-payload",
+        FULL_PAYLOAD_OPTIONS: "/credentials/full-payload-options"
     },
 
     SWAGGER:
