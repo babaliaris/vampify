@@ -76,13 +76,13 @@ export function vampifyCreateFootprint(req: FastifyRequest, device_id?: string):
  * 
  * @returns The fastify reply object.
  */
-export async function vampifySignPayload<T = any>(
-  rep     : FastifyReply, user_id: string, body?: any,
+export async function vampifySignPayload<Tbody = any, Tjwt = any>(
+  rep     : FastifyReply, user_id: string, body?: Tbody,
   options?:
   {
     device_id ?: string,
     expires   ?: number,
-    jwt_data  ?: T
+    jwt_data  ?: Tjwt
   }
 ): Promise<FastifyReply>
 {
@@ -90,7 +90,7 @@ export async function vampifySignPayload<T = any>(
   const fastify: FastifyInstance = rep.server;
 
   // Create the payload object.
-  const payload: VampifyAuthPayload<T> =
+  const payload: VampifyAuthPayload<Tjwt> =
   {
     user_id     : user_id,
     foot_print  : vampifyCreateFootprint(rep.request, options?.device_id),
@@ -290,11 +290,11 @@ declare module 'fastify' {
    * 
    * @returns The fastify reply object.
    */
-    vampifySignPayload<T = any>(user_id: string, body?: any, options?:
+    vampifySignPayload<Tbody = any, Tjwt = any>(user_id: string, body?: Tbody, options?:
     {
       device_id ?: string,
       expires   ?: number,
-      jwt_data  ?: T
+      jwt_data  ?: Tjwt
     }): Promise<FastifyReply>;
   }
 }
