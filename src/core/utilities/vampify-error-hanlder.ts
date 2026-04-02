@@ -87,7 +87,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
     if (isDatabaseError(dbError))
     {
       // Log a warning, to know that database errors are happening during production.
-      fastify.log.warn({ dbCode: dbError.code, sql: dbError.sql }, 'Database Error Intercepted');
+      request.log.warn({ dbCode: dbError.code, sql: dbError.sql }, 'Database Error Intercepted');
 
       switch (dbError.code)
       {
@@ -146,7 +146,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
     // Unhandled Exceptions (500 Internel Server Errors)
 
     // Log the error.
-    fastify.log.error(
+    request.log.error(
     {
       statusCode: error.statusCode || 500,
       error     : 'Internal Server Error',
