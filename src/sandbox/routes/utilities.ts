@@ -25,7 +25,7 @@ const root: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     },
     async (req, rep) =>
     {
-        return fastify.vampifyAbort(
+        return req.vampifyAbort(
             false,
             req.body.status,
             req.body.debug_msg,

@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { VAMPIFY_DEBUG_MSG } from "../vampify-literals.js";
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 
 
 
@@ -20,11 +20,11 @@ const STATUS_TO_REASON: Record<number, keyof typeof VAMPIFY_DEBUG_MSG.REASON> =
 
 
 
-function abortEndpoint(fastify: FastifyInstance, condition: any, status: number, debugMsg: string, payload?: any): void
+function abortEndpoint(req: FastifyRequest, condition: any, status: number, debugMsg: string, payload?: any): void
 {
     // Make sure, that in production mode the debug msg IS NOT LEAKED!
     const reason    = STATUS_TO_REASON[status] || VAMPIFY_DEBUG_MSG.REASON.INTERNAL_SERVER_ERROR;
-    const finalMsg  = fastify.vampifyIsProdMode() ? reason : debugMsg;
+    const finalMsg  = req.server.vampifyIsProdMode() ? reason : debugMsg;
 
     // If condition is true, return.
     if (condition) return;
@@ -32,7 +32,7 @@ function abortEndpoint(fastify: FastifyInstance, condition: any, status: number,
     // Error.
     if (status >= 500)
     {
-        fastify.log.error(
+        req.log.error(
         {
             reason  : reason,
             status  : status,
@@ -43,7 +43,7 @@ function abortEndpoint(fastify: FastifyInstance, condition: any, status: number,
     // Warning.
     else
     {
-        fastify.log.warn(
+        req.log.warn(
         {
             reason  : reason,
             status  : status,
@@ -52,7 +52,7 @@ function abortEndpoint(fastify: FastifyInstance, condition: any, status: number,
     }
 
     // Get the appropriate @fastify/sensible error based on the status code.
-    const error = fastify.httpErrors.getHttpError(status as any, finalMsg);
+    const error = req.server.httpErrors.getHttpError(status as any, finalMsg);
 
     throw error;
 };
@@ -61,10 +61,10 @@ function abortEndpoint(fastify: FastifyInstance, condition: any, status: number,
 
 const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 {
-    // Decorate abortEndpoint().
-    fastify.decorate('vampifyAbort', function (condition: any, status: number, debug_msg: string, payload?: any): void
+    // Decorate the abort function in the request object.
+    fastify.decorateRequest('vampifyAbort', function (condition: any, status: number, debug_msg: string, payload?: any): void
     {
-        abortEndpoint(fastify, condition, status, debug_msg, payload);
+        return abortEndpoint(this, condition, status, debug_msg, payload);
     });
 });
 
@@ -73,7 +73,7 @@ const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 
 declare module 'fastify' {
 
-  interface FastifyInstance
+  interface FastifyRequest
   {
     /**
      * Aborts the endpoint by throwing a @fastify/sensible HTTP error.
