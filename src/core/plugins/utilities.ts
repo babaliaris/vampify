@@ -62,7 +62,7 @@ function abortEndpoint(req: FastifyRequest, condition: any, status: number, debu
 const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 {
     // Decorate the abort function in the request object.
-    fastify.decorateRequest('vampifyAbort', function (condition: any, status: number, debug_msg: string, payload?: any): void
+    fastify.decorateRequest('vampifyAbort', function (this: FastifyRequest, condition: any, status: number, debug_msg: string, payload?: any): void
     {
         return abortEndpoint(this, condition, status, debug_msg, payload);
     });
