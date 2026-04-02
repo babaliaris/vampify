@@ -19,18 +19,21 @@ const root: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
 
             response:
             {
+                200: Type.Boolean(),
                 ...VampifyStandardResponseErrors
             }
         }
     },
     async (req, rep) =>
     {
-        return req.vampifyAbort(
+        const value = req.vampifyAbort(
             false,
             req.body.status,
             req.body.debug_msg,
             req.body.payload
         );
+
+        return rep.send(value);
     });
 };
 

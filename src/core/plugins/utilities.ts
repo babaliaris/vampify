@@ -20,14 +20,14 @@ const STATUS_TO_REASON: Record<number, keyof typeof VAMPIFY_DEBUG_MSG.REASON> =
 
 
 
-function abortEndpoint(req: FastifyRequest, condition: any, status: number, debugMsg: string, payload?: any): void
+function abortEndpoint(req: FastifyRequest, condition: any, status: number, debugMsg: string, payload?: any): any
 {
     // Make sure, that in production mode the debug msg IS NOT LEAKED!
     const reason    = STATUS_TO_REASON[status] || VAMPIFY_DEBUG_MSG.REASON.INTERNAL_SERVER_ERROR;
     const finalMsg  = req.server.vampifyIsProdMode() ? reason : debugMsg;
 
     // If condition is true, return.
-    if (condition) return;
+    if (condition) return condition;
 
     // Error.
     if (status >= 500)
@@ -62,7 +62,7 @@ function abortEndpoint(req: FastifyRequest, condition: any, status: number, debu
 const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 {
     // Decorate the abort function in the request object.
-    fastify.decorateRequest('vampifyAbort', function (this: FastifyRequest, condition: any, status: number, debug_msg: string, payload?: any): void
+    fastify.decorateRequest('vampifyAbort', function (this: FastifyRequest, condition: any, status: number, debug_msg: string, payload?: any): any
     {
         return abortEndpoint(this, condition, status, debug_msg, payload);
     });
@@ -88,8 +88,10 @@ declare module 'fastify' {
      * @param status The HTTP error code you want to throw.
      * @param debug_msg The debug message for the response & the internal logging.
      * @param payload A payload object for the internal logging.
+     *
+     * @returns The condition value.
      */
-    vampifyAbort<T>(condition: T | null | undefined | false, status: number, debug_msg: string, payload?: any): asserts condition;
+    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload?: any): T;
   }
 }
 
