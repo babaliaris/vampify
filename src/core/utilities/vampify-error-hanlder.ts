@@ -78,7 +78,8 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
         statusCode: 400,
         error     : 'Bad Request',
         message   : 'The data provided is invalid.',
-        details   : error.validation,
+        reqId     : request.id,
+        details   : error.validation
       });
     }
 
@@ -97,6 +98,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
             statusCode: 409,
             error     : 'Conflict',
             message   : 'This record already exists.',
+            reqId     : request.id,
             details   : isDebuggable ? error.message : ""
           });
 
@@ -107,6 +109,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
             statusCode: 400,
             error     : 'Bad Request',
             message   : 'Related record not found.',
+            reqId     : request.id,
             details   : isDebuggable ? error.message : ""
           });
 
@@ -116,6 +119,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
             statusCode: 400,
             error     : 'Bad Request',
             message   : 'Value is too long for the database field.',
+            reqId     : request.id,
             details   : isDebuggable ? error.message : ""
           });
 
@@ -125,6 +129,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
             statusCode: 400,
             error     : 'Bad Request',
             message   : 'Numeric value is out of range.',
+            reqId     : request.id,
             details   : isDebuggable ? error.message : ""
           });
       }
@@ -139,6 +144,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
         statusCode: error.statusCode,
         error     : error.name,
         message   : error.message,
+        reqId     : request.id,
         details   : (error as any).details || undefined
       });
     }
@@ -160,6 +166,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
       statusCode: error.statusCode || 500,
       error     : 'Internal Server Error',
       message   : isDebuggable ? error.message  : 'Internal Server Error',
+      reqId     : request.id,
       stack     : isDebuggable ? error.stack    : {}
     });
   });

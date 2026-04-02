@@ -67,6 +67,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(400,{description: "The error code"}),
     error     : Type.Literal('Bad Request',{description: "The error title"}),
     message   : Type.String({description: "A message explaining the error"}),
+    reqId     : Type.Optional(Type.Number({description: "The request id"})),
     details   : Type.Optional(Type.Union(
     [
       Type.Array(Type.Any()),
@@ -87,6 +88,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(401),
     error     : Type.Literal('Unauthorized'),
     message   : Type.String({ description: "A msg explaining the error" }),
+    reqId     : Type.String({description: "The server internal request id"}),
     details   : Type.Optional(Type.Any({description: "Details about this error."}))
   },
   
@@ -100,6 +102,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(403),
     error     : Type.Literal('Forbidden'),
     message   : Type.String({ description: "A msg explaining the error" }),
+    reqId     : Type.Optional(Type.Number({description: "The request id"})),
     details   : Type.Optional(Type.Any({description: "Details about this error."}))
   },
   {
@@ -112,6 +115,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(404),
     error     : Type.Literal('Not Found'),
     message   : Type.String({ description: "A msg explaining the error" }),
+    reqId     : Type.Optional(Type.Number({description: "The request id"})),
     details   : Type.Optional(Type.Any({description: "Details about this error."}))
   },
   {
@@ -124,6 +128,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(409,{description: "The error code"}),
     error     : Type.Literal('Conflict',{description: "The error title"}),
     message   : Type.String({description: "A message explaining the error"}),
+    reqId     : Type.Optional(Type.Number({description: "The request id"})),
     details   : Type.Optional(Type.String({description: "A detailed description"})),
   },
   {
@@ -136,6 +141,7 @@ export const VampifyStandardResponseErrors =
     statusCode: Type.Literal(500,{description: "The error code"}),
     error     : Type.Literal('Internal Server Error',{description: "The error title"}),
     message   : Type.String({description: "A message describing the error"}),
+    reqId     : Type.Optional(Type.Number({description: "The request id"})),
     stack     : Type.Optional(Type.Any({description: "An object containing the stack"}))
   },
   {
