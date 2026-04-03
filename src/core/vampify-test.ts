@@ -40,7 +40,8 @@ async function vampifyBoot(vampifyApp: any, mock_routes?: FastifyPluginAsync): P
   // Read environment variables.
   dotenv.config({
     path  : path.join(process.cwd(), ".env.test"),
-    debug : false
+    debug : false,  // Disable debug logs.
+    quiet : true    //Disable hints and other logs.
   });
 
   // Create the fastify instance.
