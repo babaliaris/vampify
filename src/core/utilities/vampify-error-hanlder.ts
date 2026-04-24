@@ -139,6 +139,8 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
     // These already have a statusCode attached from @fastify/sensible.
     if (error.statusCode && error.statusCode < 500)
     {
+      request.log.error(error, `[HTTP ERROR]: ${error.message}`);
+
       return reply.status(error.statusCode).send(
       {
         statusCode: error.statusCode,
@@ -152,13 +154,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
     // Unhandled Exceptions (500 Internel Server Errors)
 
     // Log the error.
-    request.log.error(
-    {
-      statusCode: error.statusCode || 500,
-      error     : 'Internal Server Error',
-      message   : isDebuggable ? error.message  : 'Internal Server Error',
-      stack     : isDebuggable ? error.stack    : {}
-    });
+    request.log.error(error, `[INTERNAL SERVER ERROR]: ${error.message}`);
 
     // Return the error to the response.
     return reply.status(error.statusCode || 500).send(
