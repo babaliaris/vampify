@@ -136,12 +136,15 @@ export function vampifySetupE2E(vampifyApp: any, mock_routes?: FastifyPluginAsyn
       {
         await fastify.db.transaction(async (tx) =>
         {
+          // Inject our custom test identification flag directly onto the transaction object.
+          (tx as any).__is_vampify_test_transaction__ = true;
+
           fastify.db  = tx; // The "Hot Swap".
 
           if (!fk_check) await tx.execute(sql`SET FOREIGN_KEY_CHECKS = 0;`)
           await testBody(fastify);
           if (!fk_check) await tx.execute(sql`SET FOREIGN_KEY_CHECKS = 1;`)
-          
+
           // Force the transaction to rollback if testBody() does not throw an error.
           throw Error("VampifyCleanRollback");
         });

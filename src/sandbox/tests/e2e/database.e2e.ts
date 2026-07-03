@@ -3,14 +3,42 @@ import assert from 'node:assert';
 import { VampifyInstance } from "@/core/vampify-literals.js";
 import { vampifySetupE2E } from "@vampify/test";
 import {vampifyApp} from "@/sandbox/app.js";
+import { FastifyPluginAsync } from 'fastify';
 
 import { eq, Table} from 'drizzle-orm';
 import * as schema from "../../db/schema.js";
 import {usersTable} from "../../db/schema.js";
 
+const mock_routes: FastifyPluginAsync = async (fastify)=>
+{
+  fastify.post('/test-transaction-retry', async (req, rep) =>
+  {
+    const result = await req.runInTransactionRetry(async (tx) =>
+    {
+      const insertResult = await tx.insert(usersTable).values(
+      {
+        name: "Test Retry User",
+        age: 25,
+        email: "retry@vampify.io"
+      });
+
+      // Fetch back the newly inserted row inside the transaction block
+      const row = await tx
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, insertResult[0].insertId));
+
+      return row[0];
+    });
+
+    return rep.status(201).send(result);
+  });
+};
+
+
 describe('Database Tests', () =>
 {
-  const e2e_suite = vampifySetupE2E(vampifyApp);
+  const e2e_suite = vampifySetupE2E(vampifyApp, mock_routes);
 
   test('table should exist', async () =>
   {
@@ -52,4 +80,25 @@ describe('Database Tests', () =>
       assert(select_result.length === 0);
     });
   });
+
+
+  test('Should execute runInTransactionRetry successfully via request payload', async () =>
+  {
+    await e2e_suite.runInTransaction(async (fastify: VampifyInstance)=>
+    {
+      const response = await fastify.inject(
+      {
+        method: 'POST',
+        url   : '/test-transaction-retry'
+      });
+
+      assert.strictEqual(response.statusCode, 201);
+
+      const body = JSON.parse(response.payload);
+      assert.strictEqual(body.name, "Test Retry User");
+      assert.strictEqual(body.age, 25);
+      assert.strictEqual(body.email, "retry@vampify.io");
+    });
+  });
+
 });

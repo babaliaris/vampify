@@ -31,7 +31,14 @@ export const vampifyApp = fp( async (fastify: VampifyInstance, opts: FastifyPlug
 
 // Extend the Fastify type system.
 declare module 'fastify' {
-  interface FastifyInstance {
+  interface FastifyInstance
+  {
+    /**
+    * The drizzle-orm database object.
+    * This is the raw drizzle-orm object
+    * that you can use to have access to
+    * the drizzle API.
+    */
     db: MySql2Database<typeof schema>;
   }
 }
