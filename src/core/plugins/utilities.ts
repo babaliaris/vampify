@@ -54,6 +54,9 @@ function abortEndpoint(req: FastifyRequest, condition: any, status: number, debu
     // Get the appropriate @fastify/sensible error based on the status code.
     const error = req.server.httpErrors.getHttpError(status as any, finalMsg);
 
+    // Attach the payload to the final error object (details).
+    (error as any).details = payload;
+
     throw error;
 };
 

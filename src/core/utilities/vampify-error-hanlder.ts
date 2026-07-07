@@ -147,7 +147,7 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
         error     : error.name,
         message   : error.message,
         reqId     : request.id,
-        details   : (error as any).details || undefined
+        details   : isDebuggable ? ((error as any).details || undefined) : undefined
       });
     }
 
@@ -163,7 +163,8 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
       error     : 'Internal Server Error',
       message   : isDebuggable ? error.message  : 'Internal Server Error',
       reqId     : request.id,
-      stack     : isDebuggable ? error.stack    : {}
+      stack     : isDebuggable ? error.stack    : {},
+      details   : isDebuggable ? ((error as any).details || undefined) : undefined
     });
   });
 }

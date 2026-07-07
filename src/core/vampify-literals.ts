@@ -68,15 +68,7 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Bad Request',{description: "The error title"}),
     message   : Type.String({description: "A message explaining the error"}),
     reqId     : Type.String({description: "The server internal request id"}),
-    details   : Type.Optional(Type.Union(
-    [
-      Type.Array(Type.Any()),
-      Type.String()
-    ],
-    {
-      description: "Validation array or database error message" 
-    }))
-    
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   {
     description: 'Validation or logic error'
@@ -89,7 +81,7 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Unauthorized'),
     message   : Type.String({ description: "A msg explaining the error" }),
     reqId     : Type.String({description: "The server internal request id"}),
-    details   : Type.Optional(Type.Any({description: "Details about this error."}))
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   
   {
@@ -103,7 +95,7 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Forbidden'),
     message   : Type.String({ description: "A msg explaining the error" }),
     reqId     : Type.String({description: "The server internal request id"}),
-    details   : Type.Optional(Type.Any({description: "Details about this error."}))
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   {
     description: 'Access denied'
@@ -116,7 +108,7 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Not Found'),
     message   : Type.String({ description: "A msg explaining the error" }),
     reqId     : Type.String({description: "The server internal request id"}),
-    details   : Type.Optional(Type.Any({description: "Details about this error."}))
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   {
     description: 'The requested resource was not found'
@@ -129,7 +121,7 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Conflict',{description: "The error title"}),
     message   : Type.String({description: "A message explaining the error"}),
     reqId     : Type.String({description: "The server internal request id"}),
-    details   : Type.Optional(Type.String({description: "A detailed description"})),
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   {
     description: 'Duplicate entry found'
@@ -142,7 +134,8 @@ export const VampifyStandardResponseErrors =
     error     : Type.Literal('Internal Server Error',{description: "The error title"}),
     message   : Type.String({description: "A message describing the error"}),
     reqId     : Type.String({description: "The server internal request id"}),
-    stack     : Type.Optional(Type.Any({description: "An object containing the stack"}))
+    stack     : Type.Optional(Type.Any({description: "An object containing the stack"})),
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
   },
   {
     description: 'Unexpected server error'
