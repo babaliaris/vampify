@@ -7,20 +7,22 @@ import { Type, Static } from '@sinclair/typebox'
 //Define the Schema.
 export const VampifyEnvSchema = Type.Object(
 {
-  DB_URL: Type.String(),
-  DB_HOST: Type.String(),
-  DB_USER: Type.String(),
-  DB_PASS: Type.String(),
-  DB_NAME: Type.String(),
-  DB_LIMIT: Type.Integer(),
-  DB_DEBUG: Type.Boolean(),
-  LOG_SHIPPER_KEY_HASH: Type.String(),
-  JWT_SECRET: Type.String(),
-  JWT_EXPIRES: Type.Integer(),
+  DB_URL      : Type.String(),
+  DB_HOST     : Type.String(),
+  DB_USER     : Type.String(),
+  DB_PASS     : Type.String(),
+  DB_NAME     : Type.String(),
+  DB_LIMIT    : Type.Integer(),
+  DB_DEBUG    : Type.Boolean(),
+  JWT_SECRET  : Type.String(),
+  JWT_EXPIRES : Type.Integer(),
 
-  RUN_MODE: Type.String(),
-  LOGGING: Type.Boolean(),
-  LOG_METHOD: Type.String(),
+  RUN_MODE            : Type.String(),
+  LOGGING             : Type.Boolean(),
+  LOG_METHOD          : Type.String(),
+  LOG_SHIPPER_KEY_HASH: Type.Optional(Type.String()),
+  LOG_SHIPPER_POST_URL: Type.Optional(Type.String()),
+
   SERVER_PORT: Type.Number()
 });
 
