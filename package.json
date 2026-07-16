@@ -13,7 +13,6 @@
     "test:e2e": "cross-env NODE_ENV=test NODE_OPTIONS=\"--enable-source-maps\" node --test --test-concurrency=1 --import tsx \"src/sandbox/tests/e2e/**/*.e2e.ts\"",
     "test:e2e:file": "cross-env NODE_ENV=test NODE_OPTIONS=\"--enable-source-maps\" node --test --import tsx",
     "test:unit": "cross-env NODE_ENV=test NODE_OPTIONS=\"--enable-source-maps\" node --test --import tsx \"src/sandbox/tests/unit/**/*.{test,spec}.ts\"",
-
     "dev": "cross-env NODE_ENV=development tsx watch src/sandbox/server.ts",
     "db:migrate": "npm run db:generate && npm run db:dev:migrate && npm run db:test:migrate",
     "db:generate": "cross-env NODE_ENV=development drizzle-kit generate",
@@ -39,6 +38,7 @@
     "fastify-plugin": "^5.1.0",
     "mysql2": "^3.16.3",
     "pino-roll": "^4.0.0",
+    "ua-parser-js": "^2.0.10",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

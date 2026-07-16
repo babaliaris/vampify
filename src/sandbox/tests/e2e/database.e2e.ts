@@ -17,9 +17,10 @@ const mock_routes: FastifyPluginAsync = async (fastify)=>
     {
       const insertResult = await tx.insert(usersTable).values(
       {
-        name: "Test Retry User",
-        age: 25,
-        email: "retry@vampify.io"
+        email             : "retry@vampify.io",
+        password          : "123",
+        verification_hash : "hash",
+        is_verified       : true
       });
 
       // Fetch back the newly inserted row inside the transaction block
@@ -61,13 +62,25 @@ describe('Database Tests', () =>
     await e2e_suite.runInTransaction(async (fastify: VampifyInstance)=>
     {
       // Insert a user and check for success.
-      const insert_result = await fastify.db.insert(usersTable).values({name: "Nick", age: 30, email: "something@gmail.com"});
+      const insert_result = await fastify.db
+      .insert(usersTable)
+      .values(
+      {
+        email             : "email@vampify.io",
+        password          : "123",
+        verification_hash : "hash",
+        is_verified       : true
+      });
       assert(insert_result[0].insertId > 0);
 
       // Do a select test.
-      let select_result = await fastify.db.select().from(usersTable).where(eq(usersTable.name, "Nick"));
+      let select_result = await fastify.db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.email, "email@vampify.io")
+      );
       assert(select_result.length === 1);
-      assert(select_result[0].name === "Nick");
     });
   });
 
@@ -76,7 +89,12 @@ describe('Database Tests', () =>
     await e2e_suite.runInTransaction(async (fastify: VampifyInstance)=>
     {
       // Previous 'Test Transaction' should have rolled back, so the entry should no exist.
-      let select_result = await fastify.db.select().from(usersTable).where(eq(usersTable.name, "Nick"));
+      let select_result = await fastify.db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.email, "email@vampify.io")
+      );
       assert(select_result.length === 0);
     });
   });
@@ -95,9 +113,10 @@ describe('Database Tests', () =>
       assert.strictEqual(response.statusCode, 201);
 
       const body = JSON.parse(response.payload);
-      assert.strictEqual(body.name, "Test Retry User");
-      assert.strictEqual(body.age, 25);
       assert.strictEqual(body.email, "retry@vampify.io");
+      assert.strictEqual(body.password, "123");
+      assert.strictEqual(body.verification_hash, "hash");
+      assert.strictEqual(body.is_verified, true);
     });
   });
 

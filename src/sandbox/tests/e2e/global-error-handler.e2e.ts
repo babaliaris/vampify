@@ -13,15 +13,17 @@ const mock_routes: FastifyPluginAsync = async (fastify)=>
     fastify.post('/test-duplicated-entry-error', async (req, rep) =>
     {
       await fastify.db.insert(usersTable).values({
-        name: "Nick",
-        age: 30,
-        email: "something@gmail.com"
+        email             : "retry@vampify.io",
+        password          : "123",
+        verification_hash : "hash",
+        is_verified       : true
       });
 
       await fastify.db.insert(usersTable).values({
-        name: "Nick",
-        age: 30,
-        email: "something@gmail.com"
+        email             : "retry@vampify.io",
+        password          : "123",
+        verification_hash : "hash",
+        is_verified       : true
       });
     });
 

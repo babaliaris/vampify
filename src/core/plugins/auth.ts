@@ -11,7 +11,16 @@ export type VampifyAuthPayload<T = any> =
 {
   user_id     : string,
   foot_print  : string,
+  user_role  ?: string,
   data       ?: T
+};
+
+export type VampifyAuthSignOptionsType<Tjwt> =
+{
+  device_id ?: string,
+  expires   ?: number,
+  jwt_data  ?: Tjwt,
+  user_role ?: string
 };
 
 
@@ -78,12 +87,7 @@ export function vampifyCreateFootprint(req: FastifyRequest, device_id?: string):
  */
 export async function vampifySignPayload<Tbody = any, Tjwt = any>(
   rep     : FastifyReply, user_id: string, body?: Tbody,
-  options?:
-  {
-    device_id ?: string,
-    expires   ?: number,
-    jwt_data  ?: Tjwt
-  }
+  options?: VampifyAuthSignOptionsType<Tjwt>
 ): Promise<FastifyReply>
 {
   // Get the fastify server.
@@ -94,6 +98,7 @@ export async function vampifySignPayload<Tbody = any, Tjwt = any>(
   {
     user_id     : user_id,
     foot_print  : vampifyCreateFootprint(rep.request, options?.device_id),
+    user_role   : options?.user_role,
     data        : options?.jwt_data
   };
 
@@ -259,6 +264,47 @@ export async function vampifyServiceAuthenticator(req: FastifyRequest, res: Fast
 }
 
 
+/**
+ * A PreHandler Factory that creates a role-based guard.
+ * It assumes vampifyAuth has already run and populated req.vampify_payload.
+ */
+function requireRoles<TUserRoleType = any>(
+    roles: TUserRoleType[] | TUserRoleType)
+{
+  const rolesArray = Array.isArray(roles) ? roles : [roles];
+
+  return async (req: FastifyRequest) =>
+  {
+    // Check that the payload and jtw data are defined.
+    req.vampifyAbort(
+      req.vampify_payload && req.vampify_payload.user_role,
+      500,
+      `[requireRoles()] Payload & user_role should exist at this point.`,
+      {
+        roles   : rolesArray,
+        actual  : "undefined",
+        payload : req.vampify_payload
+      }
+    );
+
+    // Get the user role.
+    const user_role = req.vampify_payload?.user_role;
+
+    // Check that the role matches.
+    req.vampifyAbort(
+      rolesArray.includes(user_role as TUserRoleType),
+      403,
+      `[requireRoles()] Access Denied: Required roles was not included in the roles array`,
+      {
+        roles : rolesArray,
+        actual: user_role
+      }
+    );
+  };
+};
+
+
+
 
 const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
 {
@@ -289,6 +335,12 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
   // Decorate vampifyServiceAuth() function.
   fastify.decorate("vampifyServiceAuth", vampifyServiceAuthenticator);
 
+  // Decorate requrie roles.
+  fastify.decorate("vampifyRequireRolesAuth", (roles: any) =>
+  {
+    return requireRoles(roles);
+  });
+
   // Request Decorator vampifyCreateFootprint().
   fastify.decorateRequest("vampifyCreateFootprint", function (this: FastifyRequest) {
     return vampifyCreateFootprint(this);
@@ -312,16 +364,33 @@ declare module 'fastify' {
 
    /**
    * User Authenticator (GUARD).
-   * 
+   *
    * Authenticate an attempt login.
    * 
    * Example usage in a route:
    *     fastify.get("/login", {preHandler: [fastify.vampifyAuth]}, async (req, rep)=>...)
-   * 
+   *
    * @param req The FastifyRequest object.
    * @param rep The FastifyReply object.
    */
     vampifyAuth(req: FastifyRequest, rep: FastifyReply): Promise<void>;
+
+    /**
+    * Check the role of a user.
+    *
+    * This function will check the role of a user,
+    * and if it's not the expected one, it will throw
+    * a forbidden http error.
+    *
+    *  MAKE SURE TO INITIALIZE THE user_role property
+    *  during vampifySignPayload(user_id, body, options)
+    *  by providing the user_role optional option.
+    *
+    * @param role The role to be checked.
+    */
+  vampifyRequireRolesAuth<TUserRoleType>(roles: TUserRoleType[] | TUserRoleType):
+      (req: FastifyRequest, res: FastifyReply) => Promise<void>;
+
 
   /**
    * Service Authenticator (GUARD).
@@ -336,7 +405,7 @@ declare module 'fastify' {
 
 
     /**
-     * 
+     *
      * @param password The word to be hashed.
      * @returns The hashed string.
      */
@@ -344,7 +413,7 @@ declare module 'fastify' {
 
 
     /**
-     * 
+     *
      * @param password The word to be compared
      * @param hash The hash to be compared
      * @returns True on success, false otherwise.
@@ -391,12 +460,11 @@ declare module 'fastify' {
    * 
    * @returns The fastify reply object.
    */
-    vampifySignPayload<Tbody = any, Tjwt = any>(user_id: string, body?: Tbody, options?:
-    {
-      device_id ?: string,
-      expires   ?: number,
-      jwt_data  ?: Tjwt
-    }): Promise<FastifyReply>;
+    vampifySignPayload<Tbody = any, Tjwt = any>(
+      user_id : string,
+      body   ?: Tbody,
+      options?: VampifyAuthSignOptionsType<Tjwt>
+    ): Promise<FastifyReply>;
   }
 }
 

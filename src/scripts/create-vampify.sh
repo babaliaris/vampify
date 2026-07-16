@@ -133,7 +133,7 @@ cat <<EOF > tsconfig.json
       "@vampify/utils": ["$VAMPIFY_RELATIVE/src/core/utilities/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts"],
+  "include": ["src/**/*.ts", "$VAMPIFY_RELATIVE/src/core/**/*.ts", "log_shipper.ts"],
   "exclude": ["node_modules", "dist"]
 }
 EOF

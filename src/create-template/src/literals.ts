@@ -13,6 +13,16 @@ export const ROUTE_ENDPOINTS =
     SWAGGER:
     {
         ROOT: "/docs"
+    },
+
+    REACT_LOGS:
+    {
+      ROOT: "/react-logs"
+    },
+
+    VAMPIFY_LOGS:
+    {
+      ROOT: "/vampify-logs"
     }
 } as const;
 
