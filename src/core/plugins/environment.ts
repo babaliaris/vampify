@@ -20,7 +20,7 @@ export const VampifyEnvSchema = Type.Object(
   RUN_MODE            : Type.String(),
   LOGGING             : Type.Boolean(),
   LOG_METHOD          : Type.String(),
-  LOG_SHIPPER_KEY_HASH: Type.Optional(Type.String()),
+  LOG_SHIPPER_KEY     : Type.Optional(Type.String()),
   LOG_SHIPPER_POST_URL: Type.Optional(Type.String()),
 
   SERVER_PORT: Type.Number()

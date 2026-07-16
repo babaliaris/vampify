@@ -197,27 +197,34 @@ export async function vampifyServiceAuthenticator(req: FastifyRequest, res: Fast
     return res.unauthorized(rep_msg);
   }
 
+  // Get and check the required key.
+  const expectedKey = process.env.LOG_SHIPPER_KEY;
+  if (!expectedKey)
+  {
+    const debug_msg = `Missing ${VAMPIFY_LITERALS.X_SERVICE_API_KEY}`;
+    const rep_msg   = fastify.vampifyIsProdMode()
+      ? `Server Configuration Error`
+      : debug_msg;
+
+    req.log.error(debug_msg);
+    return res.internalServerError(rep_msg);
+  }
+
   // Try to check the api key hash with the expected one
   // that lives in the environment variables.
   try
   {
-    // Hash the incoming key
-    const incomingHash = createHash("sha256").update(apiKey).digest("hex");
-
-    // Retrieve the expected hash from your environment config
-    const expectedHash = process.env.LOG_SHIPPER_KEY_HASH;
-
-    // Retrieve the expected hash from the environment variables.
-    if (!expectedHash)
+    // timingSafeEqual requires buffers of equal length to prevent timing attacks.
+    // If the lengths don't match, we fail early to prevent buffer errors.
+    if (apiKey.length !== expectedKey.length)
     {
-      req.log.error("LOG_SHIPPER_KEY_HASH is not configured in environment variables.");
-      return res.internalServerError("Server configuration error");
+      return res.unauthorized(`Invalid API Key (${VAMPIFY_LITERALS.X_SERVICE_API_KEY})`);
     }
 
     // Constant-time comparison to prevent timing attacks
     const isMatch = timingSafeEqual(
-      Buffer.from(incomingHash, 'hex'),
-      Buffer.from(expectedHash, 'hex')
+      Buffer.from(apiKey, 'utf-8'),
+      Buffer.from(expectedKey, 'utf-8')
     );
 
     if (!isMatch)
