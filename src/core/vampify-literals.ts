@@ -1,8 +1,8 @@
 import {
   FastifyInstance,
-  FastifyBaseLogger, 
-  RawReplyDefaultExpression, 
-  RawRequestDefaultExpression, 
+  FastifyBaseLogger,
+  RawReplyDefaultExpression,
+  RawRequestDefaultExpression,
   RawServerDefault  } from 'fastify';
 
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
@@ -10,7 +10,10 @@ import { Type } from "@sinclair/typebox";
 
 export const VAMPIFY_LITERALS = {
     PAYLOAD_COOKIE_NAME : "VAMPIFY_PAYLOAD_COOKIE",
-    X_NATIVE_DEVICE_ID  : "x-vampify-device-id"
+    X_NATIVE_DEVICE_ID  : "x-vampify-device-id",
+    LOGS_DIR_NAME_PROD  : "logs",
+    LOGS_DIR_NAME_DEV   : "logs-dev",
+    LOGS_FILE_BASE_NAME : "vampify-app.log"
 } as const;
 
 export type VampifyInstance = FastifyInstance<

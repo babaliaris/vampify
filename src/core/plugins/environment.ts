@@ -33,14 +33,15 @@ type VampifyRawEnv = {
 
 // Environment Literals.
 export const VAMPIFY_ENV_LITERALS = {
-  RUN_MODE_DEV      : "development",
-  RUN_MODE_PROD     : "production",
-  RUN_MODE_TEST     : "test",
-  LOG_METHOD_PRETTY : "pretty",
-  LOG_METHOD_ROLL   : "roll",
-  LOG_METHOD_STDOUT : "stdout",
-  TRUE              : "true",
-  FALSE             : "false"
+  RUN_MODE_DEV              : "development",
+  RUN_MODE_PROD             : "production",
+  RUN_MODE_TEST             : "test",
+  LOG_METHOD_PRETTY         : "pretty",
+  LOG_METHOD_ROLL           : "roll",
+  LOG_METHOD_ROLL_AND_STDOUT: "roll_and_stdout",
+  LOG_METHOD_STDOUT         : "stdout",
+  TRUE                      : "true",
+  FALSE                     : "false"
 };
 
 // Plugin Options.
