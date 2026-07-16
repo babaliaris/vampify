@@ -3,7 +3,7 @@ import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
 import { VAMPIFY_LITERALS } from "../vampify-literals.js";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import bcrypt from 'bcrypt';
 
 
@@ -173,6 +173,85 @@ export async function vampifyAuthenticate(req: FastifyRequest, res: FastifyReply
 }
 
 
+/**
+ * Guard for background service scripts using a static API Key.
+ * Bypasses JWT and Footprint validation entirely.
+ */
+export async function vampifyServiceAuthenticator(req: FastifyRequest, res: FastifyReply): Promise<void>
+{
+  // Get the server instance.
+  const fastify = req.server;
+
+  // Extract key from 'X-Service-API-Key' header
+  const apiKey = req.headers[VAMPIFY_LITERALS.X_SERVICE_API_KEY];
+
+  // Check if the key exists and its a string.
+  if (typeof apiKey !== "string")
+  {
+    const debug_msg = `Missing ${VAMPIFY_LITERALS.X_SERVICE_API_KEY}`;
+    const rep_msg   = fastify.vampifyIsProdMode()
+      ? `Unauthorized`
+      : debug_msg;
+
+    req.log.warn(debug_msg);
+    return res.unauthorized(rep_msg);
+  }
+
+  // Try to check the api key hash with the expected one
+  // that lives in the environment variables.
+  try
+  {
+    // Hash the incoming key
+    const incomingHash = createHash("sha256").update(apiKey).digest("hex");
+
+    // Retrieve the expected hash from your environment config
+    const expectedHash = process.env.LOG_SHIPPER_KEY_HASH;
+
+    // Retrieve the expected hash from the environment variables.
+    if (!expectedHash)
+    {
+      req.log.error("LOG_SHIPPER_KEY_HASH is not configured in environment variables.");
+      return res.internalServerError("Server configuration error");
+    }
+
+    // Constant-time comparison to prevent timing attacks
+    const isMatch = timingSafeEqual(
+      Buffer.from(incomingHash, 'hex'),
+      Buffer.from(expectedHash, 'hex')
+    );
+
+    if (!isMatch)
+    {
+      return res.unauthorized(`Invalid API Key (${VAMPIFY_LITERALS.X_SERVICE_API_KEY})`);
+    }
+
+    // Auth succeeded! Attach a dummy system payload to keep TS happy if needed
+    req.vampify_payload =
+    {
+      user_id   : "system-logger-service",
+      foot_print: "bypass",
+      data      :
+      {
+        is_system: true
+      }
+    };
+  }
+
+  // Something went wrong.
+  catch (err)
+  {
+    const debug_msg = `Unauthorized access to ${VAMPIFY_LITERALS.X_SERVICE_API_KEY}`;
+    const rep_msg   = fastify.vampifyIsProdMode()
+      ? `Unauthorized`
+      : debug_msg;
+
+    req.log.warn(err, debug_msg);
+
+    return res.unauthorized(rep_msg);
+  }
+}
+
+
 
 const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
 {
@@ -200,6 +279,9 @@ const vampifyAuthenticationPlugin = fp(async (fastify: FastifyInstance) =>
   // Decorate vampifyAuth() function.
   fastify.decorate("vampifyAuth", vampifyAuthenticate);
 
+  // Decorate vampifyServiceAuth() function.
+  fastify.decorate("vampifyServiceAuth", vampifyServiceAuthenticator);
+
   // Request Decorator vampifyCreateFootprint().
   fastify.decorateRequest("vampifyCreateFootprint", function (this: FastifyRequest) {
     return vampifyCreateFootprint(this);
@@ -222,7 +304,7 @@ declare module 'fastify' {
   {
 
    /**
-   * Authenticate.
+   * User Authenticator (GUARD).
    * 
    * Authenticate an attempt login.
    * 
@@ -233,6 +315,18 @@ declare module 'fastify' {
    * @param rep The FastifyReply object.
    */
     vampifyAuth(req: FastifyRequest, rep: FastifyReply): Promise<void>;
+
+  /**
+   * Service Authenticator (GUARD).
+   *
+   * Authenticate a service api key. Make sure the
+   * the request contains the x-service-api-key header.
+   *
+   * @param req The FastifyRequest object.
+   * @param rep The FastifyReply object.
+   */
+    vampifyServiceAuth(req: FastifyRequest, rep: FastifyReply): Promise<void>;
+
 
     /**
      * 

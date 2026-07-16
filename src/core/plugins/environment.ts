@@ -14,6 +14,7 @@ export const VampifyEnvSchema = Type.Object(
   DB_NAME: Type.String(),
   DB_LIMIT: Type.Integer(),
   DB_DEBUG: Type.Boolean(),
+  LOG_SHIPPER_KEY_HASH: Type.String(),
   JWT_SECRET: Type.String(),
   JWT_EXPIRES: Type.Integer(),
 

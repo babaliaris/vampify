@@ -11,6 +11,7 @@ import { Type } from "@sinclair/typebox";
 export const VAMPIFY_LITERALS = {
     PAYLOAD_COOKIE_NAME : "VAMPIFY_PAYLOAD_COOKIE",
     X_NATIVE_DEVICE_ID  : "x-vampify-device-id",
+    X_SERVICE_API_KEY   : "x-service-api-key",
     LOGS_DIR_NAME_PROD  : "logs",
     LOGS_DIR_NAME_DEV   : "logs-dev",
     LOGS_FILE_BASE_NAME : "vampify-app.log"
