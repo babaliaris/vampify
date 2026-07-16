@@ -6,7 +6,7 @@ import { Type } from '@sinclair/typebox';
 import {
   desc, like, sql, lt, lte, or, eq, gte, and
 } from 'drizzle-orm';
-import { ReactLogsTable, FastifyLogsTable } from '@/db/schema.js';
+import { ReactLogsTable, VampifyLogsTable } from '@/db/schema.js';
 import {
   ReactLogDataSchema, ReactLogDeleteRepSchema, ReactLogPostSchema,
   ReactLogPaginateQuerySchema
@@ -75,7 +75,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     preHandler:
     [
       fastify.vampifyAuth,
-      fastify.acstAuthRequireRoles("ADMIN")
+      fastify.vampifyRequireRolesAuth<string>("ADMIN")
     ],
     schema:
     {
@@ -210,7 +210,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     preHandler:
     [
       fastify.vampifyAuth,
-      fastify.acstAuthRequireRoles("ADMIN")
+      fastify.vampifyRequireRolesAuth<string>("ADMIN")
     ],
     schema:
     {
@@ -290,7 +290,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     const raw_id  = Number(req.vampify_payload?.user_id);
     const user_id = !Number.isNaN(raw_id) ? raw_id : null;
 
-    await fastify.db.insert(FastifyLogsTable).values(
+    await fastify.db.insert(VampifyLogsTable).values(
     {
       req_id    : req.body.req_id || req.id,
       user_id   : user_id,
@@ -316,7 +316,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     preHandler:
     [
       fastify.vampifyAuth,
-      fastify.acstAuthRequireRoles("ADMIN")
+      fastify.vampifyRequireRolesAuth<string>("ADMIN")
     ],
     schema:
     {
@@ -365,7 +365,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
   }
   }, async (req, rep) =>
   {
-    const table       = FastifyLogsTable;
+    const table       = VampifyLogsTable;
     const offset      = req.query.m_page * req.query.m_limit;
     const conditions  = [];
 
@@ -456,7 +456,7 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
   {
     preHandler: [
       fastify.vampifyAuth,
-      fastify.acstAuthRequireRoles("ADMIN")
+      fastify.vampifyRequireRolesAuth<string>("ADMIN")
     ],
     schema:
     {
@@ -487,8 +487,8 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
       : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const del_result = await fastify.db
-    .delete(FastifyLogsTable)
-    .where(lt(FastifyLogsTable.created_at, target_date));
+    .delete(VampifyLogsTable)
+    .where(lt(VampifyLogsTable.created_at, target_date));
 
     const message = del_result[0].affectedRows > 0
       ? `Server logs older than ${target_date.toDateString()} were cleaned up successfully!`
