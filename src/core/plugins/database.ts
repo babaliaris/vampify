@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
+import { drizzle, MySql2Database, MySql2PreparedQueryHKT, MySql2QueryResultHKT } from "drizzle-orm/mysql2";
 import { sql } from "drizzle-orm";
 import { MySqlTransaction } from "drizzle-orm/mysql-core";
 import mysql from "mysql2/promise";
@@ -14,13 +14,16 @@ export type DatabasePluginOptions<TSchema extends Record<string, unknown> = Reco
 
 // Database & transaction TYPES.
 export type VampifyDbInstance<TSchema extends Record<string, unknown> = Record<string, unknown>> = MySql2Database<TSchema>;
-export type VampifyTxInstance<TSchema extends Record<string, unknown> = Record<string, unknown>> = MySqlTransaction<
-  any, // MySqlQueryResultKind
-  any, // MySqlPreparedQueryConfig
+export type VampifyTxInstance<
+  TSchema extends Record<string, unknown> = Record<string, unknown>,
+  TQueryResult extends MySql2QueryResultHKT = MySql2QueryResultHKT,
+  TPreparedQueryHKT extends MySql2PreparedQueryHKT = MySql2PreparedQueryHKT
+> = MySqlTransaction<
+  TQueryResult,
+  TPreparedQueryHKT,
   TSchema,
-  any  // ExtractTablesWithRelations
+  any
 >;
-
 
 /**
   * This function is decorated to the fastify instance and is being used by the user to wrap
@@ -152,8 +155,13 @@ declare module "fastify"
       *
       * @returns The transaction result object.
       */
-    runInTransactionRetry<T>(
-      callback: (tx: VampifyTxInstance) => Promise<T>,
+    runInTransactionRetry<
+      T,
+      TSchema extends Record<string, unknown> = Record<string, unknown>,
+      TQueryResult extends MySql2QueryResultHKT = MySql2QueryResultHKT,
+      TPreparedQueryHKT extends MySql2PreparedQueryHKT = MySql2PreparedQueryHKT
+    >(
+      callback: (tx: VampifyTxInstance<TSchema, TQueryResult, TPreparedQueryHKT> ) => Promise<T>,
       maxRetries?: number
     ): Promise<T>;
   }
