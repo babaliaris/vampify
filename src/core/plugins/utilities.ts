@@ -20,7 +20,7 @@ const STATUS_TO_REASON: Record<number, keyof typeof VAMPIFY_DEBUG_MSG.REASON> =
 
 
 
-function abortEndpoint(req: FastifyRequest, condition: any, status: number, debugMsg: string, payload?: any, runBeforeAbort?: ()=> Promise<void> ): any
+function abortEndpoint(req: FastifyRequest, condition: any, status: number, debugMsg: string, payload?: any, runBeforeAbort?: ()=> Promise<void> | void ): any
 {
     // Make sure, that in production mode the debug msg IS NOT LEAKED!
     const reason    = STATUS_TO_REASON[status] || VAMPIFY_DEBUG_MSG.REASON.INTERNAL_SERVER_ERROR;
@@ -86,7 +86,7 @@ const vampifyUtilitiesPlugin = fp(async (fastify: FastifyInstance) =>
 {
     // Decorate the abort function in the request object.
     fastify.decorateRequest('vampifyAbort',
-    function (this: FastifyRequest, condition: any, status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> Promise<void>): any
+    function (this: FastifyRequest, condition: any, status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> Promise<void> | void): any
     {
         return abortEndpoint(this, condition, status, debug_msg, payload, runBeforeAbort);
     });
@@ -116,7 +116,27 @@ declare module 'fastify' {
      *
      * @returns The condition value.
      */
-    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> Promise<void>): T;
+    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> Promise<void>): Promise<T>;
+
+
+    /**
+     * Aborts the endpoint by throwing a @fastify/sensible HTTP error.
+     * 
+     * This function uses fastify.log() to log internally the debug_msg
+     * & the payload BUT it GUARANTEES in production mode, that debug_msg
+     * will not LEAK! Otherwise, the debug_msg will be used for the response as well.
+     * 
+     * It works like an ASSERTION !
+     * 
+     * @param condition If falsey, the enpoint is aborted (The error is thrown)!
+     * @param status The HTTP error code you want to throw.
+     * @param debug_msg The debug message for the response & the internal logging.
+     * @param payload A payload object for the internal logging.
+     * @param runBeforeAbort User defined callback that runs before the abortion happens.
+     *
+     * @returns The condition value.
+     */
+    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> void): T;
   }
 }
 
