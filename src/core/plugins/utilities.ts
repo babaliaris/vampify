@@ -116,7 +116,7 @@ declare module 'fastify' {
      *
      * @returns The condition value.
      */
-    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload?: any, runBeforeAbort?: ()=> Promise<void>): Promise<T>;
+    vampifyAbort<T>(condition: T , status: number, debug_msg: string, payload: any, runBeforeAbort: ()=> Promise<void>): Promise<T>;
 
 
     /**
