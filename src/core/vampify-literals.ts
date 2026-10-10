@@ -132,6 +132,19 @@ export const VampifyStandardResponseErrors =
   }),
 
 
+  429: Type.Object(
+  {
+    statusCode: Type.Literal(429,{description: "Too many requests"}),
+    error     : Type.Literal('Conflict',{description: "The error title"}),
+    message   : Type.String({description: "A message explaining the error"}),
+    reqId     : Type.String({description: "The server internal request id"}),
+    details   : Type.Optional(Type.Any({ description: "Validation details or custom diagnostic payload" }))
+  },
+  {
+    description: 'Duplicate entry found'
+  }),
+
+
   500: Type.Object(
   {
     statusCode: Type.Literal(500,{description: "The error code"}),
