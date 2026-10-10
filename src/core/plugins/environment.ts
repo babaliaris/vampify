@@ -23,7 +23,12 @@ export const VampifyEnvSchema = Type.Object(
   LOG_SHIPPER_KEY     : Type.Optional(Type.String()),
   LOG_SHIPPER_POST_URL: Type.Optional(Type.String()),
 
-  SERVER_PORT: Type.Number()
+  SERVER_PORT: Type.Number(),
+
+  MAILER_HOST: Type.Optional(Type.String()),
+  MAILER_PORT: Type.Optional(Type.Integer()),
+  MAILER_USER: Type.Optional(Type.String()),
+  MAILER_PASS: Type.Optional(Type.String())
 });
 
 // Convert the Schema to a typscript object.
