@@ -44,6 +44,15 @@ const mock_routes: FastifyPluginAsync = async (fastify)=>
     fastify.get('/test-error-generic', async () => {
       throw new Error('Boom!');
     });
+
+    // Simulate the mysql2 driver error for deleting a parent row that is still referenced.
+    // (Creating real FK tables here would need DDL, which implicitly commits the test transaction.)
+    fastify.delete('/test-row-is-referenced', async () => {
+      const err: any = new Error('Cannot delete or update a parent row: a foreign key constraint fails');
+      err.code  = 'ER_ROW_IS_REFERENCED_2';
+      err.errno = 1451;
+      throw err;
+    });
 };
 
 
@@ -92,5 +101,18 @@ describe('Vampify Framework Tests', () =>
     const payload = JSON.parse(response.payload);
 
     assert.strictEqual(response.statusCode, 500);
+  });
+
+  test('should transform ER_ROW_IS_REFERENCED_2 into 409 Conflict', async () =>
+  {
+    const response = await e2e_suite.fastify.inject({
+      method: 'DELETE',
+      url: '/test-row-is-referenced'
+    });
+
+    const payload = JSON.parse(response.payload);
+
+    assert.strictEqual(response.statusCode, 409);
+    assert.strictEqual(payload.error, 'Conflict');
   });
 });

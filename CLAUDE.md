@@ -34,6 +34,16 @@ Tests use the built-in `node:test` runner through `tsx`. E2E tests need a runnin
 - To add an env var: add it to `VampifyEnvSchema`. That updates the type of `fastify.getEnvs()` and the global `process.env` typing.
 - `LOG_METHOD`: `pretty` | `stdout` | `roll` | `roll_and_stdout`. `LOGGING=false` turns logging off. Rolling logs are written to `logs/` (production) or `logs-dev/`.
 
+## Logging pipeline
+
+- **User id.** The `req` serializer runs only for the `'incoming request'` line, which is logged before any preHandler, so it cannot know the user. Instead, `vampifyAuthenticate` binds `vampify_user_id` with `setBindings()`. That changes the request's logger in place, so `reply.log` (which writes `'request completed'`) sees it too; reassigning `req.log` with `child()` would not.
+  - `req.log` is typed `FastifyBaseLogger`, which hides pino-only methods, and when `LOGGING=false` Fastify uses a no-op logger that lacks them. The `vampifyIsPinoLogger()` type guard in `auth.ts` checks for `bindings()`/`setBindings()` before use.
+  - `setBindings()` appends instead of overwriting, so the binding is skipped when `vampify_user_id` is already in `req.log.bindings()` (e.g. `vampifyAuth` running twice in one request).
+  - Service-key requests (`vampifyServiceAuth`) and guest requests bind no `vampify_user_id`.
+- **Shipping.** The template's `log_shipper.ts` reads pino JSON from stdin (`node app.js | node log_shipper.js`). It truncates fields to the column limits, maps `vampify_user_id` to a numeric `user_id`, and POSTs rows with `x-service-api-key` to the template's `/vampify-logs` route, which stores `req.body.user_id`. It reports rejected rows once per batch.
+- Downstream apps keep hand-maintained copies of `log_shipper.ts` and the logs route/schema, so changes here have to be ported to them manually.
+- `src/sandbox/tests/e2e/logging.e2e.ts` boots its own instance with an in-memory logger, because `vampifySetupE2E` uses `.env.test` (`LOGGING=false`).
+
 ## Core architecture
 
 `vampifyPlugin` (`src/core/vampify.ts`) is a `fastify-plugin` that registers, in this order: env → global error handler → database → `@fastify/sensible` → auth → utilities. An app's `app.ts` registers `vampifyPlugin` with its Drizzle `schema`, then autoloads `plugins/` and `routes/` with `@fastify/autoload`. The app also augments `FastifyInstance.db` with its own `MySql2Database<typeof schema>` type.
@@ -45,7 +55,7 @@ Each core plugin adds decorators and declares their types with `declare module '
 - **database** (`plugins/database.ts`): a mysql2 pool with `dateStrings` and `bigNumberStrings`, exposed as `fastify.db`. `req.runInTransactionRetry(cb, maxRetries)` wraps `cb` in a transaction and retries on `ER_LOCK_DEADLOCK`. Inside a test transaction it skips the retry so deadlocks surface. The `onReady` hook runs `SELECT 1`, so the server fails to start if the DB is unreachable.
 - **auth** (`plugins/auth.ts`): `@fastify/jwt` + `@fastify/cookie`.
   - `rep.vampifySignPayload(user_id, body, {device_id, expires, jwt_data, user_role})` signs a JWT that contains a "footprint", the sha256 of (IP or `device_id`) + user-agent. Without `device_id`, the token is set as an HttpOnly, Secure, SameSite=None cookie (`VAMPIFY_PAYLOAD_COOKIE`). With `device_id` (native/mobile clients), it is returned in the body.
-  - Guards: `fastify.vampifyAuth` checks the JWT and the footprint, then sets `req.vampify_payload`. Native clients send the `x-vampify-device-id` header.
+  - Guards: `fastify.vampifyAuth` checks the JWT and the footprint, then sets `req.vampify_payload` and binds `vampify_user_id` to the request logger with `req.log.setBindings()`. Native clients send the `x-vampify-device-id` header.
   - Other guards: `fastify.vampifyRequireRolesAuth(roles)` (run it after `vampifyAuth`) and `fastify.vampifyServiceAuth` (static `x-service-api-key` compared to `LOG_SHIPPER_KEY` in constant time).
 - **utilities** (`plugins/utilities.ts`): `req.vampifyAbort(condition, status, debugMsg, payload?, runBeforeAbort?)` works like an assert. If `condition` is falsy, it logs the message and throws a sensible HTTP error. In production the response message is replaced with a generic reason code (`VAMPIFY_DEBUG_MSG.REASON`). If `runBeforeAbort` is async, it returns a Promise and must be awaited; the overloads in its type declaration encode this.
 - **error handler** (`utilities/vampify-error-hanlder.ts`, filename misspelled on purpose, do not rename casually): turns TypeBox validation errors into 400 and MySQL errors (`ER_DUP_ENTRY` → 409, FK/too-long/out-of-range → 400) into fixed responses. It hides details/stack outside dev/test. It also installs one process-wide `unhandledRejection` handler that exits the process.

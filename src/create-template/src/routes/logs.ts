@@ -287,8 +287,10 @@ const logs: FastifyPluginAsync = async (fastify: VampifyInstance): Promise<void>
     }
   }, async (req, rep) =>
   {
-    const raw_id  = Number(req.vampify_payload?.user_id);
-    const user_id = !Number.isNaN(raw_id) ? raw_id : null;
+    // The user id comes from the body (sent by the log shipper), NOT from
+    // req.vampify_payload: this request is authenticated by the service key,
+    // so the payload identifies the shipper, not the user who made the logged request.
+    const user_id = req.body.user_id ?? null;
 
     await fastify.db.insert(VampifyLogsTable).values(
     {

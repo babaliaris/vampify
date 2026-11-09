@@ -84,8 +84,9 @@ describe('Logger Configuration Tests', () =>
 
     const result = reqSerializer(mockRequest);
 
-    // Verify mapping
-    assert.strictEqual(result.userId, '123');
+    // Verify mapping. No user id is serialized here (the 'incoming request' line is
+    // logged before authentication); vampifyAuthenticate() binds vampify_user_id to the request logger.
+    assert.strictEqual(result.userId, undefined);
     assert.strictEqual(result.method, 'GET');
 
     // The actual redaction logic happens inside Pino (via the `redact` array),

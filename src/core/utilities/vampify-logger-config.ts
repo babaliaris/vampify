@@ -29,8 +29,10 @@ export function vampifyGetLoggerConfig(): boolean | (FastifyLoggerOptions & Logg
         return {
           method        : request.method,
           url           : request.url,
-          ip            : request.ip,
-          userId        : request.vampify_payload?.user_id || 'guest'
+          ip            : request.ip
+          // No user id here: this serializer only runs for the 'incoming request'
+          // line, which is logged before authentication. vampifyAuthenticate()
+          // binds vampify_user_id to the request logger instead.
         };
       },
 

@@ -132,6 +132,18 @@ export function vampifyInitializeErrorHandling(fastify: VampifyInstance)
             reqId     : request.id,
             details   : isDebuggable ? error.message : ""
           });
+
+        // Deleting/updating a parent row that other rows still reference.
+        case 'ER_ROW_IS_REFERENCED_2':
+        case 'ER_ROW_IS_REFERENCED':
+          return reply.status(409).send(
+          {
+            statusCode: 409,
+            error     : 'Conflict',
+            message   : 'This record is still referenced by other records.',
+            reqId     : request.id,
+            details   : isDebuggable ? error.message : ""
+          });
       }
     }
 

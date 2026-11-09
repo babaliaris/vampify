@@ -103,6 +103,7 @@ export const FastifyLogPostSchema = Type.Object(
   data      : data,
   timestamp : timestamp,
   req_id    : Type.Optional(Type.String()),
+  user_id   : Type.Optional(user_id), // The user whose request produced the log (null/omitted for guests).
   url       : Type.Optional(Type.String()),
   method    : Type.Optional(Type.String()),
   status    : Type.Optional(Type.Number())

@@ -2,9 +2,25 @@ import fp from "fastify-plugin";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
 import { VAMPIFY_LITERALS } from "../vampify-literals.js";
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from "fastify";
 import { createHash, timingSafeEqual } from "node:crypto";
+import type { Logger } from "pino";
 import bcrypt from 'bcrypt';
+
+
+/**
+ * True when the logger is a real pino logger.
+ *
+ * Fastify types req.log as FastifyBaseLogger, which only exposes the
+ * logging methods, so pino's bindings()/setBindings() are not visible.
+ * When LOGGING=false, Fastify uses a no-op logger (abstract-logging)
+ * that does not have them at all.
+ */
+function vampifyIsPinoLogger(log: FastifyBaseLogger): log is FastifyBaseLogger & Pick<Logger, "bindings" | "setBindings">
+{
+  const candidate = log as Partial<Logger>;
+  return typeof candidate.bindings === "function" && typeof candidate.setBindings === "function";
+}
 
 
 export type VampifyAuthPayload<T = any> =
@@ -166,6 +182,18 @@ export async function vampifyAuthenticate(req: FastifyRequest, res: FastifyReply
 
     //Assign the payload to the request object.
     req.vampify_payload = payload;
+
+    // Bind the user id to every following log line of this request.
+    // setBindings() mutates the request's child logger in place, so reply.log
+    // (the same object, used for 'request completed') gets it too. Reassigning
+    // req.log with child() would not update reply.log.
+    // setBindings() does not overwrite existing bindings (it appends, which would
+    // duplicate the key in the JSON line), so skip it if vampifyAuth already ran
+    // for this request.
+    if (vampifyIsPinoLogger(req.log) && !("vampify_user_id" in req.log.bindings()))
+    {
+      req.log.setBindings({ vampify_user_id: payload.user_id });
+    }
   }
 
   // Authentication failed due to JWT verification.
