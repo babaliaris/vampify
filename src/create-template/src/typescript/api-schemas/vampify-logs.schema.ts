@@ -16,13 +16,17 @@ const req_id = Type.Union(
   Type.Null()
 ]);
 
+// Type.Null() MUST come first: Fastify's Ajv runs with type coercion, and with
+// [Number, Null] the Number branch coerces null to 0, so guest logs would be
+// stored as user 0. With [Null, Number] null matches the first branch untouched.
+// (Used by FastifyLogPostSchema, a request schema.)
 const user_id = Type.Union(
 [
+  Type.Null(),
   Type.Number(
   {
     description: "The user id or NULL for guests"
-  }),
-  Type.Null()
+  })
 ]);
 
 const ip = Type.String(

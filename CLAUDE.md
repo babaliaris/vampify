@@ -61,6 +61,10 @@ Each core plugin adds decorators and declares their types with `declare module '
 - **error handler** (`utilities/vampify-error-hanlder.ts`, filename misspelled on purpose, do not rename casually): turns TypeBox validation errors into 400 and MySQL errors (`ER_DUP_ENTRY` → 409, FK/too-long/out-of-range → 400) into fixed responses. It hides details/stack outside dev/test. It also installs one process-wide `unhandledRejection` handler that exits the process.
 - `vampify-literals.ts`: `VampifyInstance` type, constants, and `VampifyStandardResponseErrors`. Routes spread `VampifyStandardResponseErrors` into their `response` schema so error responses get through serialization.
 
+## Schema conventions
+
+- Fastify's Ajv runs with type coercion (`coerceTypes: 'array'`) and tries `anyOf` branches in order. In **request** schemas (body/querystring/params/headers), nullable unions must list `Type.Null()` first: `[Number, Null]` turns `null` into `0`, and `[String, Null]` turns it into `""`. Branch order doesn't matter in response schemas.
+
 ## Testing model
 
 `vampifySetupE2E(vampifyApp, mockRoutes?)` (`src/core/vampify-test.ts`) boots the app once per `describe` with `before`/`after` hooks. `suite.runInTransaction(async (fastify) => …, fk_check?)` opens a transaction and **hot-swaps `fastify.db` with the transaction object**. Route code reached through `fastify.inject()` then runs inside that transaction, which is always rolled back at the end.
